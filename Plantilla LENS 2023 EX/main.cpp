@@ -2,6 +2,8 @@
 #include <iostream> //Libreria para entrada y salida de datos
 #include <fstream> //Libreria para manejar archivos
 #include <string>
+#include <thread>   // Necesario para la función sleep_for
+#include <chrono>
 #include <cstdlib>//Libreria para utilizar tipos de datos string
 #include "Librerias/Dibujar bitmaps/gdipload.h"
 #include "Librerias/Musica/libzplay.h"
@@ -170,6 +172,7 @@ void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, i
 void MainRender(HWND hWnd);
 void Init();
 void KeysEvents();
+void Movimiento_Enemigo();
 void ReproductorPausa();
 void ReproductorReproduce();
 void ReproductorInicializaYReproduce();
@@ -507,7 +510,7 @@ void CargaFramesSprite_E() {
 	miEnemigo.HojaSprite = gdipLoad(miEnemigo.BmpW);
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
-	miEnemigo.XCurrentCoordDraw = 300;
+	miEnemigo.XCurrentCoordDraw = 600; //max 600 min 0
 	miEnemigo.YCurrentCoordDraw = 300;
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
@@ -645,6 +648,7 @@ void MainRender(HWND hWnd)
 {
 	LimpiarFondo(ptrBufferPixelsWindow, 0xFFFFFFFF, (ANCHO_VENTANA * ALTO_VENTANA));
 	KeysEvents();
+	Movimiento_Enemigo();
 	DibujaPixeles();
 	ActualizaAnimacion(hWnd);
 }
@@ -654,7 +658,18 @@ void Frame(float deltatime) {
 }
 
 bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false;
+void Movimiento_Enemigo() {
 
+	//Movimeinto en X
+	//for (int i = 600; i > 0; i--) {
+		
+		//miEnemigo.XCurrentCoordDraw += i;
+		//this_thread::sleep_for(chrono::milliseconds(10000)); 
+	//}
+
+
+
+}
 void KeysEvents()
 {
 	if (KEYS[input.Enter] && pantallaInicial == true)
