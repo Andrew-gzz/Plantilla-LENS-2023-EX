@@ -511,8 +511,9 @@ void CargaFramesSprite_E() {
 	miEnemigo.HojaSprite = gdipLoad(miEnemigo.BmpW);
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
+	int Coords = rand() % (400 - 150 +1)+150;
 	miEnemigo.XCurrentCoordDraw = 600; //max 600 min 0
-	miEnemigo.YCurrentCoordDraw = 300;
+	miEnemigo.YCurrentCoordDraw = Coords; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
 	//Definiendo las dimenciones en base al # de Animaciones
@@ -715,9 +716,16 @@ void KeysEvents()
 		}
 		if (KEYS[input.S] || KEYS[input.Down])
 		{
-			miPersonaje.YCurrentCoordDraw += 10;
-			AnimacionActual = Walk; 
-			S_Pressed = true;
+			if (miPersonaje.YCurrentCoordDraw >= 400) {
+				
+				AnimacionActual = Walk;
+				S_Pressed = true;
+			}
+			else {
+				miPersonaje.YCurrentCoordDraw += 10;
+				AnimacionActual = Walk;
+				S_Pressed = true;
+			}		
 		}else if (S_Pressed)
 		{
 			S_Pressed = false;
