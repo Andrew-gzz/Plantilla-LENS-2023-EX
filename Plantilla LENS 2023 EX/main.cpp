@@ -143,6 +143,7 @@ struct DatosEnemigo {
 const int ANCHO_VENTANA = 800;
 const int ALTO_VENTANA = 600;
 const int BPP = 4;
+int Mov_fondo = 0;
 //#2EFF82
 const unsigned int TRANSPARENCY = 0xFF2EFF82, TRANSPARENCY_E = 0xFF99D9EA;
 ZPlay* player = CreateZPlay();//Generamos un objeto puntero para nuestro reproductor
@@ -561,7 +562,7 @@ void DibujaPixeles()
 		//Dibujamos el fondo
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario2.pixeles),
 			0, 0,//Iniciamos a dibujar en la ventana en 0,0
-			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
+			Mov_fondo,0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario 
 			10596, 283,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario2.ancho,
 			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
@@ -573,7 +574,7 @@ void DibujaPixeles()
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,
 			800, miPersonaje.HojaSprite.ancho, 
 			3, 3, TRANSPARENCY, 1);
-
+		//Dibujamos al enemigo
 		TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
 			miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
 			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].x, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].y,
@@ -688,7 +689,7 @@ void KeysEvents()
 		
 		if (KEYS[input.W] || KEYS[input.Up])
 		{
-			miPersonaje.YCurrentCoordDraw -= 5;
+			miPersonaje.YCurrentCoordDraw -= 10;
 			AnimacionActual = Walk;
 			W_Pressed = true;
 		}
@@ -701,7 +702,7 @@ void KeysEvents()
 		}
 		if (KEYS[input.D] || KEYS[input.Right])
 		{
-			miPersonaje.XCurrentCoordDraw += 21;
+			Mov_fondo += 12;
 			AnimacionActual = Dash;
 			D_Pressed = true;
 		}
@@ -714,7 +715,7 @@ void KeysEvents()
 		}
 		if (KEYS[input.S] || KEYS[input.Down])
 		{
-			miPersonaje.YCurrentCoordDraw += 5;
+			miPersonaje.YCurrentCoordDraw += 10;
 			AnimacionActual = Walk; 
 			S_Pressed = true;
 		}else if (S_Pressed)
@@ -726,7 +727,7 @@ void KeysEvents()
 		}
 		if (KEYS[input.A] || KEYS[input.Left])
 		{
-			miPersonaje.XCurrentCoordDraw -= 7; 
+			Mov_fondo -= 7; 
 			AnimacionActual = Walk;  
 			A_Pressed = true;
 		}else if (A_Pressed )
