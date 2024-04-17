@@ -1,7 +1,8 @@
 #include <windows.h>
 #include <iostream> //Libreria para entrada y salida de datos
 #include <fstream> //Libreria para manejar archivos
-#include <string> //Libreria para utilizar tipos de datos string
+#include <string>
+#include <cstdlib>//Libreria para utilizar tipos de datos string
 #include "Librerias/Dibujar bitmaps/gdipload.h"
 #include "Librerias/Musica/libzplay.h"
 
@@ -39,14 +40,17 @@ struct Input
 	};
 }input;
 bool KEYS[256];
+enum Animaciones_Enemigo{
 
+Running_E
+
+};
 enum Animaciones
 {
 	Idle,
-	Running_Right,
-	Running_Left,
-	Jump,
 	Dash,
+	Jump,
+	Walk,
 };
 enum Stages
 {
@@ -87,23 +91,23 @@ struct DatosPersonaje{
 	int YCurrentCoordDraw;
 
 	//Dimensiones en pixeles que se requieren para dibujarlo en la ventana
-	int HeightDraw;
-	int WeightDraw;
 
 	int Animaciones = 4;
+
 	int idAnimacionIdle = 0;
 	int FramesAnimacionIdle = 6;
 
-	int idAnimacionCaminando = 1;
-	int FramesAnimacionCaminando = 8;
+	int idAnimacionCorrer = 1;
+	int FramesAnimacionCorrer = 8;
 
-	int idAnimacionSaltando = 2;
-	int FramesAnimacionSaltando = 13;
+	int idAnimacionJump = 2;
+	int FramesAnimacionJump= 13    ;
 
-	int idAnimacionGameOver = 3;
-	int FramesAnimacionGameOver = 0;
-	
+	int idAnimacionWalk = 3;
+	int FramesAnimacionWalk = 6;
+
 	FrameArray** FrameSpriteArray;
+
 }miPersonaje;
 struct DatosStage{
 	int Escenarios = 4;
@@ -117,16 +121,33 @@ struct DatosStage{
 	WCHAR Bmp4[MAX_PATH] = L"";
 }miStage;
 
+struct DatosEnemigo {
+
+	WCHAR BmpW[MAX_PATH] = L"Recursos/Enemigo.bmp";
+	miBitmap HojaSprite;
+
+	int XCurrentCoordDraw;
+	int YCurrentCoordDraw;
+
+	int Animaciones_Enemigo = 2;
+
+	int idAnimacionRunning = 0;
+	int FramesAnimacionRunning = 6;
+
+	FrameArray** FrameSpriteArray; 
+
+}miEnemigo; 
 //Variables Globales
 const int ANCHO_VENTANA = 800;
 const int ALTO_VENTANA = 600;
 const int BPP = 4;
-const unsigned int TRANSPARENCY = 0xFF00FF00; 
+//#2EFF82
+const unsigned int TRANSPARENCY = 0xFF2EFF82, TRANSPARENCY_E = 0xFF99D9EA;
 ZPlay* player = CreateZPlay();//Generamos un objeto puntero para nuestro reproductor
 TStreamStatus status;
 bool pausa = false;
 int* ptrBufferPixelsWindow;
-int AnimacionActual;
+int AnimacionActual, Animacion_E;
 int FrameActual = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
@@ -145,7 +166,7 @@ float timer = 0.0f;
 //Definicion de funciones
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void LimpiarFondo(int *ptrBuffer, unsigned int color, int area);
-void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, int inicioYDestino, int inicioXOrigen, int inicioYOrigen, int ancho, int alto, int anchodefondo, int anchodeorigen, int escalaX, int escalaY);
+void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, int inicioYDestino, int inicioXOrigen, int inicioYOrigen, int ancho, int alto, int anchodefondo, int anchodeorigen, int escalaX, int escalaY, const unsigned int TRANSPARENCY, double limiteX);
 void MainRender(HWND hWnd);
 void Init();
 void KeysEvents();
@@ -154,6 +175,7 @@ void ReproductorReproduce();
 void ReproductorInicializaYReproduce();
 void ReproductorCambiarCancionYReproduce(int);
 void CargaFramesSprite();
+void CargaFramesSprite_E();
 
 int WINAPI wWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR pCmdLine,int nCmdShow)
 {
@@ -162,7 +184,7 @@ int WINAPI wWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR pCmdLine,i
 	MSG msg;
 
 	TCHAR szAppName[] = TEXT("MyWinAPIApp");		
-	TCHAR szAppTitle[] = TEXT("Plantilla Lenguaje Ensamblador (cambiar nombre aqui)");
+	TCHAR szAppTitle[] = TEXT("ScottPilgrim 'The GAME'");
 
 	hInstance = GetModuleHandle(NULL);				// Grab An Instance For Our Window
 
@@ -323,14 +345,21 @@ void Init()
 	if (!pantallaInicial)
 	{
 		//Empezamos a reproducir musica
-		ReproductorCambiarCancionYReproduce(1);
+		
+		ReproductorCambiarCancionYReproduce(1); 
 	}
 	else
 	{
-		ReproductorCambiarCancionYReproduce(0);
+		srand(time(0)); 
+		int M = rand()%100 ; 
+		if (M % 2 == 0) { 
+			ReproductorCambiarCancionYReproduce(0);
+		}else		
+		ReproductorCambiarCancionYReproduce(2);
 	}
 
 	CargaFramesSprite();
+	CargaFramesSprite_E();
 
 	//Cargamos imagen bitmap de nuestro escenario
 	miStage.ImagenEscenario1 = gdipLoad(miStage.Bmp1);
@@ -341,6 +370,7 @@ void Init()
 
 	// Definimos la animacion inicial
 	AnimacionActual = Idle;
+	Animacion_E = Running_E; 
 }
 
 void CargaFramesSprite(){
@@ -348,107 +378,165 @@ void CargaFramesSprite(){
 	miPersonaje.HojaSprite = gdipLoad(miPersonaje.BmpW);
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
-	miPersonaje.XCurrentCoordDraw = 200;
-	miPersonaje.YCurrentCoordDraw = 100;
+	miPersonaje.XCurrentCoordDraw = 100;
+	miPersonaje.YCurrentCoordDraw = 300;
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
-	miPersonaje.HeightDraw = 80;
-	miPersonaje.WeightDraw = 3;
+
 
 	//Definiendo las dimenciones en base al # de Animaciones
 	miPersonaje.FrameSpriteArray = new FrameArray * [miPersonaje.Animaciones];
 	//Definiendo la cantidad de Frames en base a cada Animacion
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle] = new FrameArray[miPersonaje.FramesAnimacionIdle];
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando] = new FrameArray[miPersonaje.FramesAnimacionCaminando];
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando] = new FrameArray[miPersonaje.FramesAnimacionSaltando];
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer] = new FrameArray[miPersonaje.FramesAnimacionCorrer];
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump] = new FrameArray[miPersonaje.FramesAnimacionJump];
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk] = new FrameArray[miPersonaje.FramesAnimacionWalk]; 
+
 
 	//Cargando Frames a nuestro arreglo del sprite
 	// ------ - Animacion 1 Idle -------- //
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].x = 5; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].alto = 62;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].x = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].alto = 62;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].x = 84; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].alto = 62;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].x = 123; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].alto = 62;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].x = 162; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].alto = 62;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].x = 200; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].alto = 62;
 
-	// ------ - Animacion 2 caminando -------- //
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame0].x = 9; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame0].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame0].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame0].alto = 62;
+	// ------ - Animacion 2 Dash - ------ //
 	
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame1].x = 50; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame1].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame1].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame1].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].x = 9; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].alto = 62;
+	
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].x = 50; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].alto = 62;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame2].x = 96; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame2].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame2].ancho = 52; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame2].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].x = 96; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].ancho = 52; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].alto = 62;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame3].x = 152; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame3].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame3].ancho = 45; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame3].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].x = 152; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].ancho = 45; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].alto = 62;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame4].x = 201; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame4].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame4].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame4].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].x = 201; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].alto = 62;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame5].x = 243; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame5].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame5].ancho = 40; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame5].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].x = 243; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].ancho = 40; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].alto = 62;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame6].x = 287; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame6].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame6].ancho = 49; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame6].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].x = 287; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].ancho = 49; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].alto = 62;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame7].x = 340; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame7].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame7].ancho = 48; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCaminando][Frame7].alto = 62;
-
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].x = 340; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].ancho = 48; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].alto = 62;	
+	
+	
 	// ------ - Animacion 3 Saltando - ------ //
 	//1
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame0].x = 9; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame0].y = 215; 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame0].ancho = 53;/*53*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame0].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame0].x = 9; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame0].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame0].ancho = 53; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame0].alto = 77;
 	//2
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame1].x = 62; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame1].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame1].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame1].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame1].x = 62; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame1].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame1].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame1].alto = 77;
 	//3
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame2].x = 104; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame2].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame2].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame2].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame2].x = 104; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame2].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame2].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame2].alto = 77;
 	//4
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame3].x = 146; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame3].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame3].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame3].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame3].x = 146; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame3].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame3].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame3].alto = 77;
 	//5
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame4].x = 188; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame4].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame4].ancho = 42;/*43*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame4].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame4].x = 188; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame4].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame4].ancho = 43; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame4].alto = 77;
 	//6
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame5].x = 231; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame5].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame5].ancho = 42;/*44*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame5].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame5].x = 231; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame5].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame5].ancho = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame5].alto = 77;
 	//7
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame6].x = 275; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame6].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame6].ancho = 42;/*43*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame6].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame6].x = 275; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame6].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame6].ancho = 43; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame6].alto = 77;
 	//8
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame7].x = 318; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame7].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame7].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame7].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame7].x = 318; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame7].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame7].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame7].alto = 77;
 	//9
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame8].x = 360; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame8].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame8].ancho = 42; /*38*/miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame8].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame8].x = 360; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame8].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame8].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame8].alto = 77;
 	//10
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame9].x = 398; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame9].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame9].ancho = 42;/*40*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame9].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame9].x = 398; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame9].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame9].ancho = 40; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame9].alto = 77;
 	//11
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame10].x = 438; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame10].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame10].ancho = 42;/*38*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame10].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame10].x = 438; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame10].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame10].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame10].alto = 77;
 	//12
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame11].x = 476; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame11].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame11].ancho = 42;/*39*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame11].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame11].x = 476; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame11].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame11].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame11].alto = 77;
 	//13
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame12].x = 515; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame12].y = 215;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame12].ancho = 42;/*51*/ miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionSaltando][Frame12].alto = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].x = 515; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].y = 215;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].ancho = 51; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].alto = 77;
+	
+	// ------ - Animacion 2 caminando -------- //
+	
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].x = 7; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].alto = 64;
+
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].x = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].alto = 64;
+
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].x = 82; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].alto = 64;
+
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].x = 119; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].alto = 64;
+
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].x = 155; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].alto = 64;
+
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].x = 192; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].alto = 64;
+
 }
 
+void CargaFramesSprite_E() {
+	//Cargamos primero las hojas de sprite
+	miEnemigo.HojaSprite = gdipLoad(miEnemigo.BmpW);
 
+	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
+	miEnemigo.XCurrentCoordDraw = 300;
+	miEnemigo.YCurrentCoordDraw = 300;
+	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
+
+	//Definiendo las dimenciones en base al # de Animaciones
+	miEnemigo.FrameSpriteArray = new FrameArray * [miEnemigo.Animaciones_Enemigo];
+	//Definiendo la cantidad de Frames en base a cada Animacion
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning] = new FrameArray[miEnemigo.FramesAnimacionRunning]; 
+
+	// ------ - Animacion 1 Corriendo - ------ //
+	//0
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].x = 607; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].y = 504;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].ancho = 78; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].alto = 180; 
+	//1
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].x = 527; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].y = 504;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].ancho = 80; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].alto = 180;
+	//3
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].x = 448; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].y = 504;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].ancho = 79; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].alto = 180;
+	//4
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].x = 371; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].y = 504;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].ancho = 80; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].alto = 180;
+	//5
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].x = 291; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].y = 504;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].ancho = 80; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].alto = 180;
+	//6
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].x = 212; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].y = 504;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].ancho = 79; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].alto = 180;
+
+}
 /* Funcion principal. Encargada de hacer el redibujado en pantalla cada intervalo (o "Tick") del timer que se haya creado.
 	@param hWnd. Manejador de la ventana.
 	*/
@@ -462,7 +550,7 @@ void DibujaPixeles()
 			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
 			ANCHO_VENTANA, ALTO_VENTANA,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario1.ancho,
-			1, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 
 	}
 	else
@@ -473,7 +561,7 @@ void DibujaPixeles()
 			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
 			10596, 283,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario2.ancho,
-			2, 2);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 		//Dibujamos a nuestro personaje
 
 		TranScaleblt(ptrBufferPixelsWindow, (miPersonaje.HojaSprite.pixeles), 
@@ -481,8 +569,16 @@ void DibujaPixeles()
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].x, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].y,
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,
 			800, miPersonaje.HojaSprite.ancho, 
-			3, 3);
+			3, 3, TRANSPARENCY, 1);
+
+		TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
+			miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
+			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].x, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].y,
+			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].ancho, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].alto,
+			800, miEnemigo.HojaSprite.ancho,
+			2, 2, TRANSPARENCY_E, 1);
 	}
+
 
 }
 void ActualizaAnimacion(HWND hWnd){
@@ -506,31 +602,41 @@ void ActualizaAnimacion(HWND hWnd){
 
 		break;
 
-	case Running_Right:
-		//if (Tick % Tick == 0 && FrameActual == 0)//125
-		//{
-		//	DelayFrameAnimation++;
-		//}
-		//else if (Tick % Tick == 0 && FrameActual == 2)
-		//{
-		//	DelayFrameAnimation += 3;
-		//}
-		//if (DelayFrameAnimation % 18 == 0)
-		//{
-			FrameActual++;
-			if (FrameActual >= 8) FrameActual = 0;
-		//}
+	case Dash: {
+		/*
+if (Tick % Tick == 0 && FrameActual == 0)//125
+{
+	DelayFrameAnimation++;
+}
+else if (Tick % Tick == 0 && FrameActual == 2)
+{
+	DelayFrameAnimation += 3;
+}
+if (DelayFrameAnimation % 18 == 0)
+{
 
-		break;
-	
-	case Jump:
+}*/
 
 		FrameActual++;
-		if (FrameActual > 13) FrameActual = 0; 
+		if (FrameActual > 7) FrameActual = 0;
+	}break;
+	case Jump: {
+		FrameActual++;
+		if (FrameActual > 12) FrameActual = 0;
+	}break;
+	case Walk: {
+		FrameActual++;
+		if (FrameActual > 5) FrameActual = 0;
+	}break;
 
-
+	}
+	switch (Animacion_E){
+	case Running_E:
+		FrameActual++;
+		if (FrameActual > 5) FrameActual = 0;
 		break;
-
+	default:
+		break;
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -547,7 +653,8 @@ void Frame(float deltatime) {
 
 }
 
-bool D_Pressed = false;
+bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false;
+
 void KeysEvents()
 {
 	if (KEYS[input.Enter] && pantallaInicial == true)
@@ -563,16 +670,24 @@ void KeysEvents()
 	}
 	if (!pantallaInicial)
 	{
+		
 		if (KEYS[input.W] || KEYS[input.Up])
 		{
 			miPersonaje.YCurrentCoordDraw -= 5;
-			
+			AnimacionActual = Walk;
+			W_Pressed = true;
 		}
-		
+		else if(W_Pressed)
+		{
+			W_Pressed = false;
+			AnimacionActual = Idle;
+			FrameActual = 0;
+
+		}
 		if (KEYS[input.D] || KEYS[input.Right])
 		{
-			miPersonaje.XCurrentCoordDraw += 16;
-			AnimacionActual = Running_Right;
+			miPersonaje.XCurrentCoordDraw += 21;
+			AnimacionActual = Dash;
 			D_Pressed = true;
 		}
 		else if(D_Pressed)
@@ -585,18 +700,58 @@ void KeysEvents()
 		if (KEYS[input.S] || KEYS[input.Down])
 		{
 			miPersonaje.YCurrentCoordDraw += 5;
+			AnimacionActual = Walk; 
+			S_Pressed = true;
+		}else if (S_Pressed)
+		{
+			S_Pressed = false;
+			AnimacionActual = Idle;
+			FrameActual = 0;
+
 		}
 		if (KEYS[input.A] || KEYS[input.Left])
 		{
-			miPersonaje.XCurrentCoordDraw -= 8;
-		}
-		if (KEYS[input.Space]) {
+			miPersonaje.XCurrentCoordDraw -= 7; 
+			AnimacionActual = Walk;  
+			A_Pressed = true;
+		}else if (A_Pressed )
+		{
+			A_Pressed = false;
+			AnimacionActual = Idle;
+			FrameActual = 0;
 
-			
-			miPersonaje.YCurrentCoordDraw -= 5;
-			AnimacionActual = Jump;  
+		}
+		if (KEYS[input.Space]&& KEYS[input.D]) {
+			//for (int J = 0; J < 7; J = J++) {
+			//	miPersonaje.YCurrentCoordDraw -= J;
+			//}
+			miPersonaje.YCurrentCoordDraw -= 7;
+			miPersonaje.XCurrentCoordDraw += 21;
+			AnimacionActual = Jump; 
+			SPACE_Pressed = true;							
+		}
+		else if(SPACE_Pressed){ 
+			SPACE_Pressed = false;
+			AnimacionActual = Idle;
 			FrameActual = 0;
 		}
+		/*
+		if (KEYS[input.Space] && KEYS[input.A]) {
+			//for (int J = 0; J < 7; J = J++) {
+			//	miPersonaje.YCurrentCoordDraw -= J;
+			//}
+			miPersonaje.YCurrentCoordDraw -= 7; 
+			miPersonaje.XCurrentCoordDraw -= 21; 
+			AnimacionActual = Jump; 
+			SPACE_Pressed = true; 
+		}
+		else if (SPACE_Pressed) {
+			SPACE_Pressed = false;
+			AnimacionActual = Idle;
+			FrameActual = 0;
+		}
+		*/
+		
 	}
 }
 #pragma region LENS_CODE
@@ -630,70 +785,96 @@ void LimpiarFondo(int *ptrBuffer, unsigned int colorFondo, int area)
 	@param posFigura.	Posiciona la figura en la ventana.
 	*/
 
-void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, int inicioYDestino, int inicioXOrigen, int inicioYOrigen, int ancho, int alto, int anchodefondo, int anchodeorigen, int escalaX, int escalaY){
+void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, int inicioYDestino, int inicioXOrigen, int inicioYOrigen, int ancho, int alto, int anchodefondo, int anchodeorigen, int escalaX, int escalaY, const unsigned int TRANSPARENCY, double limiteX) {
 	//blt = block transfer, transferencia de bloque de imagen
 	int bytesporlineafondo = anchodefondo * 4;
 	int bytesporlineaorigen = anchodeorigen * 4;
 	int bytesporlineaimagen = ancho * 4;
+	if ((inicioXDestino + (ancho * 2) > 0 && inicioYDestino + alto > 0) && (inicioYDestino < 600 && inicioXDestino < 800)) { // Verificamos si el sprite esta dentro de los limites del buffer
 
-	__asm{
+		if (inicioXDestino < 0) { // verificamos si la esquina superior izquierda esta fueda del buffer, de ser asi, hacemos mas peque;o el sprite
+			ancho += inicioXDestino;
+			bytesporlineaimagen = ancho * 4;
+			inicioXDestino = 0;
+		}
 
-			mov edi, punteroDestino //movemos la direccion del bitmap a edi, para poder escribir en el
-			//Conseguimos el pixel inicial donde empezaremos a dibujar
-			mov eax, inicioYDestino
-			mul bytesporlineafondo //inicioY * bytesporlineafondo, asi iniciamos en la linea donde queremos 
-			mov ebx, eax //ebx contendra el resultado anterior
-			mov eax, 4
-			mul inicioXDestino //inicioX*4, para asi encontrar la columna donde queremos empezar a dibujar
-			add eax, ebx //posicion de columna + posicion de linea
-			add edi, eax //Sumamos el desplazamiento anterior al inicio de nuestra imagen para empezar a trabajar en la posicion deseada
-			mov esi, punteroOrigen //movemos la direccion de la imagen a dibujar a esi, para poder escribir de ella
-			//Conseguimos el pixel inicial DEL CUAL empezaremos a dibujar
-			mov eax, inicioYOrigen
-			mul bytesporlineaorigen //inicioY * bytesporlineaorigen, asi iniciamos en la linea donde queremos 
-			mov ebx, eax //ebx contendra el resultado anterior
-			mov eax, 4
-			mul inicioXOrigen //inicioX*4, para asi encontrar la columnda de donde queremos empezar a leer
-			add eax, ebx //posicion de columna + posicion de linea
-			add esi, eax //Sumamos el desplazamiento anterior al inicio de nuestra imagen para empezar a trabajar en la posicion deseada
-			mov eax, [esi]
-			mov ecx, alto //movemos a ecx la cantidad de lineas que dibujaremos
-			lazollenarY :
-				push ecx
-				mov ecx, escalaY
-				escaladoY :
-					push ecx //guardamos el valor anterior de ecx, porque lo reemplazaremos en un nuevo ciclo
-					mov ecx, ancho //la cantidad de columnas que dibujaremos
-					lazollenarX :
-						//mueve un pixel de la direccion apuntada por esi a la apuntada por edi, e incrementa esi y edi por 4
-						push ecx
-						mov ecx, escalaX
-						escaladoX :
-							cmp eax, [esi]
-							je nodibujar
-							mov edx, [esi]
-							mov[edi], edx
-								nodibujar :
-								add edi, 4
-						loop escaladoX
-						add esi, 4
-						pop ecx
-					loop lazollenarX
-					add edi, bytesporlineafondo //le sumamos la cantidad de bytes de la linea del fondo para pasar a la siguiente linea
-					push eax
-					mov eax, bytesporlineaimagen
-					mul escalaX
-					sub edi, eax //y retrocedemos una cantidad igual al a su ancho para dibujar desde la posicion X inicial y que no quede escalonado
-					pop eax
-					sub esi, bytesporlineaimagen
-					pop ecx
-				loop escaladoY
+		if ((inicioXDestino + ancho + limiteX) > 800) { // verificamos si la esquina inferior derecha esta fueda del buffer, de ser asi, hacemos mas peque;o el sprite
+			ancho = (800 - (inicioXDestino + (limiteX * 2)));
+			bytesporlineaimagen = ancho * 4;
+			inicioXDestino = 800 - ancho;
+		}
+
+		if (inicioYDestino < 0) { // verificamos si la esquina superior izquierda esta fueda del buffer, de ser asi, hacemos mas peque;o el sprite
+			alto += inicioYDestino;
+			inicioYDestino = 0;
+		}
+		if ((inicioYDestino + alto) > 600) { // verificamos si la esquina inferior izquierda esta fueda del buffer, de ser asi, hacemos mas peque;o el sprite
+			alto = (600 - inicioYDestino);
+			inicioYDestino = 600 - alto;
+		}
+		if (ancho < 1) ancho = 1;
+	}
+
+	__asm {
+
+		mov edi, punteroDestino //movemos la direccion del bitmap a edi, para poder escribir en el
+		//Conseguimos el pixel inicial donde empezaremos a dibujar
+		mov eax, inicioYDestino
+		mul bytesporlineafondo //inicioY * bytesporlineafondo, asi iniciamos en la linea donde queremos 
+		mov ebx, eax //ebx contendra el resultado anterior
+		mov eax, 4
+		mul inicioXDestino //inicioX*4, para asi encontrar la columnda donde queremos empezar a dibujar
+		add eax, ebx //posicion de columna + posicion de linea
+		add edi, eax //Sumamos el desplazamiento anterior al inicio de nuestra imagen para empezar a trabajar en la posicion deseada
+		mov esi, punteroOrigen //movemos la direccion de la imagen a dibujar a esi, para poder escribir de ella
+		//Conseguimos el pixel inicial DEL CUAL empezaremos a dibujar
+		mov eax, inicioYOrigen
+		mul bytesporlineaorigen //inicioY * bytesporlineaorigen, asi iniciamos en la linea donde queremos 
+		mov ebx, eax //ebx contendra el resultado anterior
+		mov eax, 4
+		mul inicioXOrigen //inicioX*4, para asi encontrar la columnda de donde queremos empezar a leer
+		add eax, ebx //posicion de columna + posicion de linea
+		add esi, eax //Sumamos el desplazamiento anterior al inicio de nuestra imagen para empezar a trabajar en la posicion deseada
+		mov eax, TRANSPARENCY
+
+		mov ecx, alto //movemos a ecx la cantidad de lineas que dibujaremos
+
+		lazollenarY :
+		push ecx
+			mov ecx, escalaY
+			escaladoY :
+		push ecx //guardamos el valor anterior de ecx, porque lo reemplazaremos en un nuevo ciclo
+			mov ecx, ancho //la cantidad de columnas que dibujaremos
+			lazollenarX :
+		//movsd //mueve un pixel de la direccion apuntada por esi a la apuntada por edi, e incrementa esi y edi por 4
+		push ecx
+			mov ecx, escalaX
+			escaladoX :
+		cmp eax, [esi]
+			je nodibujar
+			mov edx, [esi]
+			mov[edi], edx
+			nodibujar :
+		add edi, 4
+			loop escaladoX
+			add esi, 4
+			pop ecx
+			loop lazollenarX
+			add edi, bytesporlineafondo //le sumamos la cantidad de bytes de la linea del fondo para pasar a la siguiente linea
+			push eax
+			mov eax, bytesporlineaimagen
+			mul escalaX
+			sub edi, eax //y retrocedemos una cantidad igual al a su ancho para dibujar desde la posicion X inicial y que no quede escalonado
+			pop eax
+			sub esi, bytesporlineaimagen
+			pop ecx
+			loop escaladoY
 			//Lo mismo para esi
 			add esi, bytesporlineaorigen
 			pop ecx //recuperamos el valor del contador del ciclo exterior
 			loop lazollenarY
 	}
-}	
+}
 #pragma endregion
 
 void ReproductorInicializaYReproduce() {
@@ -701,6 +882,8 @@ void ReproductorInicializaYReproduce() {
 	Cancion[0].Dir = "Recursos/Audio/Intro.mp3";
 	Cancion[1].Nombre = "Nivel1";
 	Cancion[1].Dir = "Recursos/Audio/Nivel1.mp3";
+	Cancion[2].Nombre = "Inicio_1";
+	Cancion[2].Dir = "Recursos/Audio/Character_Select.mp3";
 	//Cancion[2].Nombre = "Derrota";
 	//Cancion[2].Dir = "Recursos/Mega Man Zero Ost Intermission.mp3";
 	ifstream inputFile(Cancion[0].Dir.c_str());
