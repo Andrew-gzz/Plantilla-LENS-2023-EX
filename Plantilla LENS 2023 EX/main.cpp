@@ -130,6 +130,18 @@ struct DatosStage{
 	miBitmap ImagenEscenario4;
 	WCHAR Bmp4[MAX_PATH] = L"";
 }miStage;
+//Recursos
+struct Recursos {
+	int objeto = 4;
+	miBitmap Title1;
+	WCHAR Bmp1[MAX_PATH] = L"Recursos/Scott_Pilgrim_Title.bmp";
+	miBitmap Title2;
+	WCHAR Bmp2[MAX_PATH] = L"Recursos/Press_any_key.bmp";
+	miBitmap Title3;
+	WCHAR Bmp3[MAX_PATH] = L"Recursos/Level_Complete.bmp";
+	miBitmap Title4;
+	WCHAR Bmp4[MAX_PATH] = L"Recursos/Try_Again.bmp";
+}misRecursos;
 
 struct DatosEnemigo {
 
@@ -208,7 +220,8 @@ void ReproductorInicializaYReproduce();
 void ReproductorCambiarCancionYReproduce(int);
 void CargaFramesSprite();
 void CargaFramesSprite_E();
-void CargaFramesSprites_C(); 
+void CargaFramesSprites_C();
+  
 int WINAPI wWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR pCmdLine,int nCmdShow)
 {
 	WNDCLASSEX wc;									// Windows Class Structure
@@ -397,7 +410,11 @@ void Init()
 	//Cargamos imagen bitmap de nuestro escenario
 	miStage.ImagenEscenario1 = gdipLoad(miStage.Bmp1);
 	miStage.ImagenEscenario2 = gdipLoad(miStage.Bmp2);
-
+	//Cargamos recurso
+	misRecursos.Title1 = gdipLoad(misRecursos.Bmp1);
+	misRecursos.Title2 = gdipLoad(misRecursos.Bmp2); 
+	misRecursos.Title3 = gdipLoad(misRecursos.Bmp3);
+	misRecursos.Title4 = gdipLoad(misRecursos.Bmp4);
 	//Definimos un puntero del total de pixeles que tiene nuestra ventana
 	ptrBufferPixelsWindow = new int[ANCHO_VENTANA * ALTO_VENTANA];
 
@@ -625,6 +642,20 @@ void DibujaPixeles()
 			ANCHO_VENTANA, ALTO_VENTANA,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario1.ancho,
 			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+		//Dibujamos Titulo
+		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title1.pixeles),
+			290, 350,//Iniciamos a dibujar en la ventana en 0,0
+			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
+			500, 218,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
+			800, misRecursos.Title1.ancho,
+			1, 1, TRANSPARENCY_E, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+
+		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title2.pixeles),
+			60, 0,//Iniciamos a dibujar en la ventana en 0,0
+			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
+			300, 23,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
+			800, misRecursos.Title2.ancho,
+			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 
 	}
 	else
@@ -643,14 +674,16 @@ void DibujaPixeles()
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,
 			800, miPersonaje.HojaSprite.ancho, 
 			3, 3, TRANSPARENCY, 1);
+		
 		//Dibujamos al enemigo
+		if(KEYS[input.E])
 		TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
 			miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
 			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].x, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].y,
 			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].ancho, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].alto,
 			800, miEnemigo.HojaSprite.ancho,
 			2, 2, TRANSPARENCY_E, 1);
-
+		if(KEYS[input.C])
 		//Dibujamos las monedas
 		TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
 			miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
@@ -658,6 +691,14 @@ void DibujaPixeles()
 			miMoneda.FrameSpriteArray[Animacion_C][FrameActual].ancho, miMoneda.FrameSpriteArray[Animacion_C][FrameActual].alto,
 			800, miMoneda.HojaSprite.ancho,
 			1 ,1 , TRANSPARENCY, 1);
+		//Dibujamos el Level Complete
+		if (Mov_fondo >= 10000){
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
+		}
+		if (KEYS[input.M])
+		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
+
+
 	}
 
 
@@ -685,20 +726,19 @@ void ActualizaAnimacion(HWND hWnd){
 		break;
 
 	case Dash: {
-		/*
-if (Tick % Tick == 0 && FrameActual == 0)//125
-{
-	DelayFrameAnimation++;
-}
-else if (Tick % Tick == 0 && FrameActual == 2)
-{
-	DelayFrameAnimation += 3;
-}
-if (DelayFrameAnimation % 18 == 0)
-{
+	/*
+	if (Tick % Tick == 0 && FrameActual == 0)//125
+	{
+		DelayFrameAnimation++;
+	}
+	else if (Tick % Tick == 0 && FrameActual == 2)
+	{
+		DelayFrameAnimation += 3;
+	}
+	if (DelayFrameAnimation % 18 == 0)
+	{
 
-}*/
-
+	}*/
 		FrameActual++;
 		if (FrameActual > 7) FrameActual = 0;
 	}break;
@@ -758,7 +798,7 @@ void Frame(float deltatime) {
 
 }
 
-bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false;
+bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false, END_GAME=false;
 void Movimiento_Enemigo() {
 
 	//Movimeinto en X
@@ -771,6 +811,7 @@ void Movimiento_Enemigo() {
 
 
 }
+
 void KeysEvents()
 {
 	if (KEYS[input.Enter] && pantallaInicial == true)
@@ -784,104 +825,102 @@ void KeysEvents()
 		ReproductorPausa();
 		Init();
 	}
-	if (!pantallaInicial)
-	{
-		
-		if (KEYS[input.W] || KEYS[input.Up])
+	if (!END_GAME) {
+
+		if (!pantallaInicial)
 		{
 
-			if (miPersonaje.YCurrentCoordDraw >= 130) {
-				miPersonaje.YCurrentCoordDraw -= 10; 
+			if (KEYS[input.W] || KEYS[input.Up])
+			{
+
+				if (miPersonaje.YCurrentCoordDraw >= 130) {
+					miPersonaje.YCurrentCoordDraw -= 10;
+					AnimacionActual = Walk;
+					W_Pressed = true;
+				}
 				AnimacionActual = Walk;
 				W_Pressed = true;
-			}			
-			AnimacionActual = Walk;
-			W_Pressed = true;
-		}
-		else if(W_Pressed)
-		{
-			W_Pressed = false;
-			AnimacionActual = Idle;
-			FrameActual = 0;
-
-		}
-		if (KEYS[input.D] || KEYS[input.Right])
-		{
-			
-			Mov_fondo += 12;
-			AnimacionActual = Dash;
-			D_Pressed = true;
-		}
-		else if(D_Pressed)
-		{
-			D_Pressed = false;
-			AnimacionActual = Idle;
-			FrameActual = 0; 
-			
-		}
-		if (KEYS[input.S] || KEYS[input.Down])
-		{
-			if (miPersonaje.YCurrentCoordDraw >= 400) {
-				
-				AnimacionActual = Walk;
-				S_Pressed = true;
 			}
-			else {
-				miPersonaje.YCurrentCoordDraw += 10;
+			else if (W_Pressed)
+			{
+				W_Pressed = false;
+				AnimacionActual = Idle;
+				FrameActual = 0;
+
+			}
+			if (KEYS[input.D] || KEYS[input.Right])
+			{
+				if (Mov_fondo <= 10100) {
+					Mov_fondo += 100;
+					AnimacionActual = Dash;
+					D_Pressed = true;
+
+				}
+				else {
+					END_GAME = true;
+					//AnimacionActual = Dash;
+					//D_Pressed = true;
+				}
+			}
+			else if (D_Pressed)
+			{
+				D_Pressed = false;
+				AnimacionActual = Idle;
+				FrameActual = 0;
+
+			}
+			if (KEYS[input.S] || KEYS[input.Down])
+			{
+				if (miPersonaje.YCurrentCoordDraw >= 400) {
+
+					AnimacionActual = Walk;
+					S_Pressed = true;
+				}
+				else {
+					miPersonaje.YCurrentCoordDraw += 10;
+					AnimacionActual = Walk;
+					S_Pressed = true;
+				}
+			}
+			else if (S_Pressed)
+			{
+				S_Pressed = false;
+				AnimacionActual = Idle;
+				FrameActual = 0;
+
+			}
+			if (KEYS[input.A] || KEYS[input.Left])
+			{
+				Mov_fondo -= 7;
 				AnimacionActual = Walk;
-				S_Pressed = true;
-			}		
-		}else if (S_Pressed)
-		{
-			S_Pressed = false;
-			AnimacionActual = Idle;
-			FrameActual = 0;
+				A_Pressed = true;
+			}
+			else if (A_Pressed)
+			{
+				A_Pressed = false;
+				AnimacionActual = Idle;
+				FrameActual = 0;
+
+			}
+			if (KEYS[input.Space] && KEYS[input.D]) {
+				//for (int J = 0; J < 7; J = J++) {
+				//	miPersonaje.YCurrentCoordDraw -= J;
+				//}
+				miPersonaje.YCurrentCoordDraw -= 7;
+				miPersonaje.XCurrentCoordDraw += 21;
+				AnimacionActual = Jump;
+				SPACE_Pressed = true;
+			}
+			else if (SPACE_Pressed) {
+				SPACE_Pressed = false;
+				AnimacionActual = Idle;
+				FrameActual = 0;
+			}
+
 
 		}
-		if (KEYS[input.A] || KEYS[input.Left])
-		{
-			Mov_fondo -= 7; 
-			AnimacionActual = Walk;  
-			A_Pressed = true;
-		}else if (A_Pressed )
-		{
-			A_Pressed = false;
-			AnimacionActual = Idle;
-			FrameActual = 0;
-
-		}
-		if (KEYS[input.Space]&& KEYS[input.D]) {
-			//for (int J = 0; J < 7; J = J++) {
-			//	miPersonaje.YCurrentCoordDraw -= J;
-			//}
-			miPersonaje.YCurrentCoordDraw -= 7;
-			miPersonaje.XCurrentCoordDraw += 21;
-			AnimacionActual = Jump; 
-			SPACE_Pressed = true;							
-		}
-		else if(SPACE_Pressed){ 
-			SPACE_Pressed = false;
-			AnimacionActual = Idle;
-			FrameActual = 0;
-		}
-		/*
-		if (KEYS[input.Space] && KEYS[input.A]) {
-			//for (int J = 0; J < 7; J = J++) {
-			//	miPersonaje.YCurrentCoordDraw -= J;
-			//}
-			miPersonaje.YCurrentCoordDraw -= 7; 
-			miPersonaje.XCurrentCoordDraw -= 21; 
-			AnimacionActual = Jump; 
-			SPACE_Pressed = true; 
-		}
-		else if (SPACE_Pressed) {
-			SPACE_Pressed = false;
-			AnimacionActual = Idle;
-			FrameActual = 0;
-		}
-		*/
-		
 	}
+	
 }
 #pragma region LENS_CODE
 /* Pinta el fondo de la ventana de acuerdo al color especificado.
