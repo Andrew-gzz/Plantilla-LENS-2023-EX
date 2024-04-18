@@ -54,6 +54,13 @@ enum Animaciones
 	Jump,
 	Walk,
 };
+enum Animaciones_Coin
+{
+	Coin1,
+	Coin2,
+	Coin3
+};
+
 enum Stages
 {
 	Inicio,
@@ -83,6 +90,7 @@ enum Frames {
 	Frame19,
 	Frame20
 };
+
 struct DatosPersonaje{
 	//Ruta donde esta nuestra imagen
 	WCHAR BmpW[MAX_PATH] = L"Recursos/Scott_Pilgrim.bmp";
@@ -139,6 +147,26 @@ struct DatosEnemigo {
 	FrameArray** FrameSpriteArray; 
 
 }miEnemigo; 
+struct DatosCoins{
+	WCHAR BmpW[MAX_PATH] = L"Recursos/Coins.bmp";
+	miBitmap HojaSprite;
+
+	int XCurrentCoordDraw;
+	int YCurrentCoordDraw;
+
+	int Animaciones_Coin = 4;
+
+	int idAnimacionCoin1= 0;
+	int FramesAnimacionCoin1= 6;
+
+	int idAnimacionCoin2 = 1;
+	int FramesAnimacionCoin2 = 0;
+
+	int idAnimacionCoin3 = 2;
+	int FramesAnimacionCoin3 = 0;
+
+	FrameArray** FrameSpriteArray;
+}miMoneda;
 //Variables Globales
 const int ANCHO_VENTANA = 800;
 const int ALTO_VENTANA = 600;
@@ -150,7 +178,7 @@ ZPlay* player = CreateZPlay();//Generamos un objeto puntero para nuestro reprodu
 TStreamStatus status;
 bool pausa = false;
 int* ptrBufferPixelsWindow;
-int AnimacionActual, Animacion_E;
+int AnimacionActual, Animacion_E, Animacion_C;
 int FrameActual = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
@@ -180,7 +208,7 @@ void ReproductorInicializaYReproduce();
 void ReproductorCambiarCancionYReproduce(int);
 void CargaFramesSprite();
 void CargaFramesSprite_E();
-
+void CargaFramesSprites_C(); 
 int WINAPI wWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR pCmdLine,int nCmdShow)
 {
 	WNDCLASSEX wc;									// Windows Class Structure
@@ -364,6 +392,7 @@ void Init()
 
 	CargaFramesSprite();
 	CargaFramesSprite_E();
+	CargaFramesSprites_C();
 
 	//Cargamos imagen bitmap de nuestro escenario
 	miStage.ImagenEscenario1 = gdipLoad(miStage.Bmp1);
@@ -375,8 +404,11 @@ void Init()
 	// Definimos la animacion inicial
 	AnimacionActual = Idle;
 	Animacion_E = Running_E; 
+	Animacion_C = Coin1;
 }
 
+
+//Scott
 void CargaFramesSprite(){
 	//Cargamos primero las hojas de sprite
 	miPersonaje.HojaSprite = gdipLoad(miPersonaje.BmpW);
@@ -505,7 +537,7 @@ void CargaFramesSprite(){
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].alto = 64;
 
 }
-
+//Enemigo
 void CargaFramesSprite_E() {
 	//Cargamos primero las hojas de sprite
 	miEnemigo.HojaSprite = gdipLoad(miEnemigo.BmpW);
@@ -542,6 +574,43 @@ void CargaFramesSprite_E() {
 	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].ancho = 79; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].alto = 180;
 
 }
+//Monedas
+void CargaFramesSprites_C(){
+	//Cargamos primero las hojas de sprite
+	miMoneda.HojaSprite = gdipLoad(miMoneda.BmpW);
+
+	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
+	int Coordsc = rand() % (400 - 150 + 1) + 150;
+	miMoneda.XCurrentCoordDraw = 600; //max 600 min 0
+	miMoneda.YCurrentCoordDraw = Coordsc; //Max 150 Min 400 
+	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
+
+	//Definiendo las dimenciones en base al # de Animaciones
+	miMoneda.FrameSpriteArray = new FrameArray * [miMoneda.Animaciones_Coin];
+
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1] = new FrameArray[miMoneda.FramesAnimacionCoin1]; 
+	// ------ - Animacion 1 Moneda 1- ------ //
+	//0
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].x = 20; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].y = 132;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].ancho = 43; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].alto = 60;
+	//1
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].x = 63; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].y = 132;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].ancho = 21; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].alto = 60;
+	//3
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].x = 84; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].y = 132;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].ancho = 46; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].alto = 60;
+	//4
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].x = 130; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].y = 132;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].ancho = 49; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].alto = 60;
+	//5
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].x = 189; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].y = 132;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].ancho = 67; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].alto = 60;
+	//6
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].x = 256; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].y = 132;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].ancho = 58 ; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].alto = 60;
+}
+
+
 /* Funcion principal. Encargada de hacer el redibujado en pantalla cada intervalo (o "Tick") del timer que se haya creado.
 	@param hWnd. Manejador de la ventana.
 	*/
@@ -568,7 +637,6 @@ void DibujaPixeles()
 			800, miStage.ImagenEscenario2.ancho,
 			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 		//Dibujamos a nuestro personaje
-
 		TranScaleblt(ptrBufferPixelsWindow, (miPersonaje.HojaSprite.pixeles), 
 			miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw,
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].x, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].y,
@@ -582,6 +650,14 @@ void DibujaPixeles()
 			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].ancho, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].alto,
 			800, miEnemigo.HojaSprite.ancho,
 			2, 2, TRANSPARENCY_E, 1);
+
+		//Dibujamos las monedas
+		TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
+			miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
+			miMoneda.FrameSpriteArray[Animacion_C][FrameActual].x, miMoneda.FrameSpriteArray[Animacion_C][FrameActual].y,
+			miMoneda.FrameSpriteArray[Animacion_C][FrameActual].ancho, miMoneda.FrameSpriteArray[Animacion_C][FrameActual].alto,
+			800, miMoneda.HojaSprite.ancho,
+			1 ,1 , TRANSPARENCY, 1);
 	}
 
 
@@ -590,16 +666,17 @@ void ActualizaAnimacion(HWND hWnd){
 	switch (AnimacionActual){
 
 	case Idle:
-		if (FrameActual > 5) FrameActual = 0;
+
+		//if (FrameActual > 5) FrameActual = 0;
 		if (Tick % Tick == 0 && FrameActual == 0)//125
 		{
 			DelayFrameAnimation++;
 		}
 		else if (Tick % Tick == 0 && FrameActual == 2)
 		{
-			DelayFrameAnimation += 3;
+			DelayFrameAnimation += 5;
 		}
-		if (DelayFrameAnimation % 18 == 0)
+		if (DelayFrameAnimation % 20 == 0)
 		{
 			FrameActual++;
 			if (FrameActual > 5 ) FrameActual = 0;
@@ -635,23 +712,45 @@ if (DelayFrameAnimation % 18 == 0)
 	}break;
 
 	}
+
 	switch (Animacion_E){
 	case Running_E:
 		FrameActual++;
 		if (FrameActual > 5) FrameActual = 0;
-		break;
-	default:
-		break;
+		break;	
+	}
+		InvalidateRect(hWnd, NULL, FALSE);
+	UpdateWindow(hWnd);
+}
+void ActualizaAnimacionC(HWND hWnd) {
+	switch (Animacion_C) {
+	case Coin1:
+		if (FrameActual > 5) FrameActual = 0;
+		if (Tick % Tick == 0 && FrameActual == 0)//125
+		{
+			DelayFrameAnimation++;
+		}
+		else if (Tick % Tick == 0 && FrameActual == 2)
+		{
+			DelayFrameAnimation += 3;
+		}
+		if (DelayFrameAnimation % 18 == 0)
+		{
+			FrameActual++;
+			if (FrameActual > 5 ) FrameActual = 0;
+		}
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
 }
+
 void MainRender(HWND hWnd) 
 {
 	LimpiarFondo(ptrBufferPixelsWindow, 0xFFFFFFFF, (ANCHO_VENTANA * ALTO_VENTANA));
 	KeysEvents();
 	Movimiento_Enemigo();
 	DibujaPixeles();
+	ActualizaAnimacionC(hWnd);
 	ActualizaAnimacion(hWnd);
 }
 
@@ -690,7 +789,12 @@ void KeysEvents()
 		
 		if (KEYS[input.W] || KEYS[input.Up])
 		{
-			miPersonaje.YCurrentCoordDraw -= 10;
+
+			if (miPersonaje.YCurrentCoordDraw >= 130) {
+				miPersonaje.YCurrentCoordDraw -= 10; 
+				AnimacionActual = Walk;
+				W_Pressed = true;
+			}			
 			AnimacionActual = Walk;
 			W_Pressed = true;
 		}
@@ -703,6 +807,7 @@ void KeysEvents()
 		}
 		if (KEYS[input.D] || KEYS[input.Right])
 		{
+			
 			Mov_fondo += 12;
 			AnimacionActual = Dash;
 			D_Pressed = true;
