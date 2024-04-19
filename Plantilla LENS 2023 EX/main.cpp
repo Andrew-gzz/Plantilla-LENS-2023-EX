@@ -975,7 +975,7 @@ void KeysEvents()
 			if (KEYS[input.D] || KEYS[input.Right])
 			{
 				if (Mov_fondo <= 10100) {
-					Mov_fondo += 100;
+					Mov_fondo += 25;
 					AnimacionActual = Dash;
 					D_Pressed = true;
 
@@ -1208,7 +1208,7 @@ void ReproductorInicializaYReproduce() {
 		printf("No file found");
 	else 
 		player->OpenFile(Cancion[0].Dir.c_str(), sfAutodetect);
-	player->SetMasterVolume(50, 50);// Sonido tipo estereo Left and Right - Volumen de 0 - 100
+	player->SetMasterVolume(20, 20);// Sonido tipo estereo Left and Right - Volumen de 0 - 100
 	player->Play();
 }
 
