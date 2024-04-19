@@ -8,6 +8,7 @@
 #include "Librerias/Dibujar bitmaps/gdipload.h"
 #include "Librerias/Musica/libzplay.h"
 
+
 #define Tick 100
 #define Timer 100
 
@@ -53,6 +54,8 @@ enum Animaciones
 	Dash,
 	Jump,
 	Walk,
+	Dance,
+	Death
 };
 enum Animaciones_Coin
 {
@@ -67,6 +70,7 @@ enum Stages
 	FirstStage,
 	GameOver
 };
+
 enum Frames {
 	Frame0,
 	Frame1,
@@ -102,7 +106,7 @@ struct DatosPersonaje{
 
 	//Dimensiones en pixeles que se requieren para dibujarlo en la ventana
 
-	int Animaciones = 4;
+	int Animaciones = 6;
 
 	int idAnimacionIdle = 0;
 	int FramesAnimacionIdle = 6;
@@ -115,6 +119,12 @@ struct DatosPersonaje{
 
 	int idAnimacionWalk = 3;
 	int FramesAnimacionWalk = 6;
+
+	int idAnimacionDance = 4;
+	int FramesAnimacionDance = 15;
+
+	int idAnimacionDeath = 5;
+	int FramesAnimacionDeath = 14;
 
 	FrameArray** FrameSpriteArray;
 
@@ -191,7 +201,9 @@ TStreamStatus status;
 bool pausa = false;
 int* ptrBufferPixelsWindow;
 int AnimacionActual, Animacion_E, Animacion_C;
-int FrameActual = 0;
+int FrameActual = 0, Max_Frame = 0;
+int E_ActualFrame = 0;
+int C_ActualFrame = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
 
@@ -443,7 +455,8 @@ void CargaFramesSprite(){
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer] = new FrameArray[miPersonaje.FramesAnimacionCorrer];
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump] = new FrameArray[miPersonaje.FramesAnimacionJump];
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk] = new FrameArray[miPersonaje.FramesAnimacionWalk]; 
-
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance] = new FrameArray[miPersonaje.FramesAnimacionDance];
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath] = new FrameArray[miPersonaje.FramesAnimacionDeath];
 
 	//Cargando Frames a nuestro arreglo del sprite
 	// ------ - Animacion 1 Idle -------- //
@@ -553,6 +566,95 @@ void CargaFramesSprite(){
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].x = 192; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].y = 145;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].alto = 64;
 
+	// ------ - Animacion 4 Bailando - ------ //
+	//1
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame0].x = 10; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame0].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame0].ancho = 40; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame0].alto = 70;
+	//2
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame1].x = 50; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame1].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame1].ancho = 40; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame1].alto = 70;
+	//3
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame2].x = 90; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame2].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame2].ancho = 43; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame2].alto = 70;
+	//4
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame3].x = 133; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame3].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame3].ancho = 43; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame3].alto = 70;
+	//5
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame4].x = 176; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame4].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame4].ancho = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame4].alto = 70;
+	//6
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame5].x = 220; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame5].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame5].ancho = 60; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame5].alto = 70;
+	//7
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame6].x = 280; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame6].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame6].ancho = 56; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame6].alto = 70;
+	//8
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame7].x = 336; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame7].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame7].ancho = 56; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame7].alto = 70;
+	//9
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame8].x = 392; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame8].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame8].ancho = 56; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame8].alto = 70;
+	//10
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame9].x = 448; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame9].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame9].ancho = 56; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame9].alto = 70;
+	//11
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame10].x = 504; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame10].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame10].ancho = 56; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame10].alto = 70;
+	//12
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame11].x = 560; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame11].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame11].ancho = 56; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame11].alto = 70;
+	//13
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame12].x = 616; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame12].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame12].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame12].alto = 70;
+	//14
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame13].x = 655; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame13].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame13].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame13].alto = 70;
+	//15
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].x = 693; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].y = 1909;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].alto = 70;
+	// ------ - Animacion 4 Muerte - ------ //
+	//1
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame0].x = 5; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame0].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame0].ancho = 53; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame0].alto = 54;
+	//2
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame1].x = 58; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame1].y = 1204;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame1].ancho = 60; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame1].alto = 67;
+	//3
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame2].x = 118; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame2].y = 1201;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame2].ancho = 68; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame2].alto = 70;
+	//4
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame3].x = 186; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame3].y = 1191;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame3].ancho = 65; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame3].alto = 80;
+	//5
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame4].x = 251; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame4].y = 1186;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame4].ancho = 61; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame4].alto = 85;
+	//6
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame5].x = 312; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame5].y = 1175;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame5].ancho = 50; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame5].alto = 96;
+	//7
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame6].x = 362; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame6].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame6].ancho = 47; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame6].alto = 54;
+	//8
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame7].x = 409; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame7].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame7].ancho = 60; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame7].alto = 54;
+	//9
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame8].x = 469; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame8].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame8].ancho = 65; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame8].alto = 54;
+	//10
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame9].x = 534; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame9].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame9].ancho = 65; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame9].alto = 54;
+	//11
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame10].x = 599; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame10].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame10].ancho = 64; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame10].alto = 54;
+	//12
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame11].x = 663; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame11].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame11].ancho = 67; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame11].alto = 54;
+	//13
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame12].x = 730; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame12].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame12].ancho = 70; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame12].alto = 54;
+	//14
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame13].x = 800; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame13].y = 1217;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame13].ancho = 70; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame13].alto = 54;
 }
 //Enemigo
 void CargaFramesSprite_E() {
@@ -560,7 +662,10 @@ void CargaFramesSprite_E() {
 	miEnemigo.HojaSprite = gdipLoad(miEnemigo.BmpW);
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
+	
+	//if(KEYS[input.E])
 	int Coords = rand() % (400 - 150 +1)+150;
+	
 	miEnemigo.XCurrentCoordDraw = 600; //max 600 min 0
 	miEnemigo.YCurrentCoordDraw = Coords; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
@@ -676,21 +781,28 @@ void DibujaPixeles()
 			3, 3, TRANSPARENCY, 1);
 		
 		//Dibujamos al enemigo
-		if(KEYS[input.E])
-		TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
-			miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
-			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].x, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].y,
-			miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].ancho, miEnemigo.FrameSpriteArray[Animacion_E][FrameActual].alto,
-			800, miEnemigo.HojaSprite.ancho,
-			2, 2, TRANSPARENCY_E, 1);
+		
+		if (KEYS[input.E]) {
+			
+			TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
+				miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
+				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].x, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].y,
+				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
+				800, miEnemigo.HojaSprite.ancho,
+				2, 2, TRANSPARENCY_E, 1);
+		}
+	
+		
+		
 		if(KEYS[input.C])
 		//Dibujamos las monedas
 		TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
 			miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
-			miMoneda.FrameSpriteArray[Animacion_C][FrameActual].x, miMoneda.FrameSpriteArray[Animacion_C][FrameActual].y,
-			miMoneda.FrameSpriteArray[Animacion_C][FrameActual].ancho, miMoneda.FrameSpriteArray[Animacion_C][FrameActual].alto,
+			miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].x, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].y,
+			miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
 			800, miMoneda.HojaSprite.ancho,
 			1 ,1 , TRANSPARENCY, 1);
+				
 		//Dibujamos el Level Complete
 		if (Mov_fondo >= 10000){
 			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
@@ -704,68 +816,17 @@ void DibujaPixeles()
 
 }
 void ActualizaAnimacion(HWND hWnd){
-	switch (AnimacionActual){
+	switch (AnimacionActual) {
 
 	case Idle:
 
-		//if (FrameActual > 5) FrameActual = 0;
-		if (Tick % Tick == 0 && FrameActual == 0)//125
-		{
-			DelayFrameAnimation++;
-		}
-		else if (Tick % Tick == 0 && FrameActual == 2)
-		{
-			DelayFrameAnimation += 5;
-		}
-		if (DelayFrameAnimation % 20 == 0)
-		{
-			FrameActual++;
-			if (FrameActual > 5 ) FrameActual = 0;
-		}
+	FrameActual++;
+	if (FrameActual > 5) FrameActual = 0;			
 
 		break;
 
 	case Dash: {
-	/*
-	if (Tick % Tick == 0 && FrameActual == 0)//125
-	{
-		DelayFrameAnimation++;
-	}
-	else if (Tick % Tick == 0 && FrameActual == 2)
-	{
-		DelayFrameAnimation += 3;
-	}
-	if (DelayFrameAnimation % 18 == 0)
-	{
-
-	}*/
-		FrameActual++;
-		if (FrameActual > 7) FrameActual = 0;
-	}break;
-	case Jump: {
-		FrameActual++;
-		if (FrameActual > 12) FrameActual = 0;
-	}break;
-	case Walk: {
-		FrameActual++;
-		if (FrameActual > 5) FrameActual = 0;
-	}break;
-
-	}
-
-	switch (Animacion_E){
-	case Running_E:
-		FrameActual++;
-		if (FrameActual > 5) FrameActual = 0;
-		break;	
-	}
-		InvalidateRect(hWnd, NULL, FALSE);
-	UpdateWindow(hWnd);
-}
-void ActualizaAnimacionC(HWND hWnd) {
-	switch (Animacion_C) {
-	case Coin1:
-		if (FrameActual > 5) FrameActual = 0;
+		/*
 		if (Tick % Tick == 0 && FrameActual == 0)//125
 		{
 			DelayFrameAnimation++;
@@ -776,9 +837,69 @@ void ActualizaAnimacionC(HWND hWnd) {
 		}
 		if (DelayFrameAnimation % 18 == 0)
 		{
+
+		}*/
+		FrameActual++;
+		if (FrameActual > 7) FrameActual = 0;
+	}break;
+	case Jump: {		
 			FrameActual++;
-			if (FrameActual > 5 ) FrameActual = 0;
+			if (FrameActual > 12) FrameActual = 0;		
+
+	}break;
+	case Walk: {
+		FrameActual++;
+		if (FrameActual > 5) FrameActual = 0;
+	}break;
+	case Dance: {
+		//do {
+		if (Tick % Tick == 0 && FrameActual == 0)//125
+		{
+			DelayFrameAnimation++;
 		}
+		else if (Tick % Tick == 0 && FrameActual == 7)
+		{
+			DelayFrameAnimation += 5;
+		}
+		if (DelayFrameAnimation % 1 == 0)
+		{
+			FrameActual++;
+			if (FrameActual > 14) FrameActual = 0;
+		}
+
+		//} while (FrameActual>14);
+
+	}break;
+	case Death: {
+		
+			FrameActual++;
+			if (FrameActual > 13) FrameActual = 0;
+		
+	
+	}break;
+}
+	
+		InvalidateRect(hWnd, NULL, FALSE);
+	UpdateWindow(hWnd);
+}
+void ActualizaAnimacionC(HWND hWnd) {
+	switch (Animacion_C) {
+	case Coin1:
+
+	C_ActualFrame++;
+	if (C_ActualFrame > 5 ) C_ActualFrame = 0;
+		
+	}
+	InvalidateRect(hWnd, NULL, FALSE);
+	UpdateWindow(hWnd);
+}
+
+void ActualizaAnimacionE(HWND hWnd) {
+	switch (Animacion_E) {
+	case Running_E:
+		E_ActualFrame++;
+		if (E_ActualFrame > 5) E_ActualFrame = 0;
+		break;
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -790,15 +911,17 @@ void MainRender(HWND hWnd)
 	KeysEvents();
 	Movimiento_Enemigo();
 	DibujaPixeles();
+	ActualizaAnimacion(hWnd); 
 	ActualizaAnimacionC(hWnd);
-	ActualizaAnimacion(hWnd);
+	ActualizaAnimacionE(hWnd);
+	
 }
 
 void Frame(float deltatime) {
 
 }
 
-bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false, END_GAME=false;
+bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false, END_GAME=false, F_Pressed = false, M_Pressed = false;
 void Movimiento_Enemigo() {
 
 	//Movimeinto en X
@@ -811,6 +934,7 @@ void Movimiento_Enemigo() {
 
 
 }
+bool SpacePressed = false;
 
 void KeysEvents()
 {
@@ -858,8 +982,8 @@ void KeysEvents()
 				}
 				else {
 					END_GAME = true;
-					//AnimacionActual = Dash;
-					//D_Pressed = true;
+					AnimacionActual = Dance;
+					D_Pressed = true;
 				}
 			}
 			else if (D_Pressed)
@@ -891,32 +1015,56 @@ void KeysEvents()
 			}
 			if (KEYS[input.A] || KEYS[input.Left])
 			{
-				Mov_fondo -= 7;
-				AnimacionActual = Walk;
-				A_Pressed = true;
+				if (Mov_fondo > 0) {
+					Mov_fondo -= 10;
+					AnimacionActual = Walk;
+					A_Pressed = true;
+				}
+				else {
+					AnimacionActual = Walk;
+					A_Pressed = true;
+				}
+				
 			}
 			else if (A_Pressed)
 			{
+				
 				A_Pressed = false;
 				AnimacionActual = Idle;
 				FrameActual = 0;
 
 			}
-			if (KEYS[input.Space] && KEYS[input.D]) {
-				//for (int J = 0; J < 7; J = J++) {
-				//	miPersonaje.YCurrentCoordDraw -= J;
-				//}
-				miPersonaje.YCurrentCoordDraw -= 7;
-				miPersonaje.XCurrentCoordDraw += 21;
+			
+			if (KEYS[input.Space]) {//KEYS[input.Space]&& KEYS[input.D]
+				//miPersonaje.YCurrentCoordDraw -= 7;
+				//miPersonaje.XCurrentCoordDraw += 21;
 				AnimacionActual = Jump;
 				SPACE_Pressed = true;
-			}
-			else if (SPACE_Pressed) {
+			}else if (SPACE_Pressed) {
 				SPACE_Pressed = false;
 				AnimacionActual = Idle;
 				FrameActual = 0;
 			}
+			if (KEYS[input.F]) {
+				F_Pressed = true;				
+				AnimacionActual = Dance;
+				
+			}
+			else if(F_Pressed){
+				F_Pressed = false;
+				AnimacionActual = Idle;
+				FrameActual = 0;
+			}
+			if (KEYS[input.M]) {
+				M_Pressed = true;
+				AnimacionActual = Death; 
 
+			}
+			else if (M_Pressed) {
+				M_Pressed = false;				
+				AnimacionActual = Idle;
+				FrameActual = 0;
+			}
 
 		}
 	}
