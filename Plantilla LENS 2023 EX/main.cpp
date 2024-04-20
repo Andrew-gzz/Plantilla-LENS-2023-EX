@@ -956,14 +956,20 @@ void KeysEvents()
 
 			if (KEYS[input.W] || KEYS[input.Up])
 			{
-
-				if (miPersonaje.YCurrentCoordDraw >= 130) {
-					miPersonaje.YCurrentCoordDraw -= 10;
+				//validación si esta corriendo
+				if (!D_Pressed) {
+					if (miPersonaje.YCurrentCoordDraw >= 130) {
+						miPersonaje.YCurrentCoordDraw -= 10;
+						AnimacionActual = Walk;
+						W_Pressed = true;
+					}
 					AnimacionActual = Walk;
 					W_Pressed = true;
 				}
-				AnimacionActual = Walk;
-				W_Pressed = true;
+				if (miPersonaje.YCurrentCoordDraw >= 130) {
+					miPersonaje.YCurrentCoordDraw -= 10;
+				}
+				
 			}
 			else if (W_Pressed)
 			{
@@ -995,15 +1001,19 @@ void KeysEvents()
 			}
 			if (KEYS[input.S] || KEYS[input.Down])
 			{
-				if (miPersonaje.YCurrentCoordDraw >= 400) {
-
-					AnimacionActual = Walk;
-					S_Pressed = true;
+				if (!D_Pressed) {
+					if (miPersonaje.YCurrentCoordDraw >= 370) {
+						AnimacionActual = Walk;
+						S_Pressed = true;
+					}
+					else {
+						miPersonaje.YCurrentCoordDraw += 10;
+						AnimacionActual = Walk;
+						S_Pressed = false;
+					}
 				}
-				else {
+				if (miPersonaje.YCurrentCoordDraw <= 370) {
 					miPersonaje.YCurrentCoordDraw += 10;
-					AnimacionActual = Walk;
-					S_Pressed = true;
 				}
 			}
 			else if (S_Pressed)
@@ -1015,16 +1025,17 @@ void KeysEvents()
 			}
 			if (KEYS[input.A] || KEYS[input.Left])
 			{
-				if (Mov_fondo > 0) {
-					Mov_fondo -= 10;
-					AnimacionActual = Walk;
-					A_Pressed = true;
-				}
-				else {
-					AnimacionActual = Walk;
-					A_Pressed = true;
-				}
-				
+				if (!D_Pressed) {
+					if (Mov_fondo > 0) {
+						Mov_fondo -= 10;
+						AnimacionActual = Walk;
+						A_Pressed = true;
+					}
+					else {
+						AnimacionActual = Walk;
+						A_Pressed = true;
+					}
+				}				
 			}
 			else if (A_Pressed)
 			{
@@ -1045,6 +1056,8 @@ void KeysEvents()
 				AnimacionActual = Idle;
 				FrameActual = 0;
 			}
+
+			///Baile
 			if (KEYS[input.F]) {
 				F_Pressed = true;				
 				AnimacionActual = Dance;
@@ -1055,6 +1068,7 @@ void KeysEvents()
 				AnimacionActual = Idle;
 				FrameActual = 0;
 			}
+			//Muerte
 			if (KEYS[input.M]) {
 				M_Pressed = true;
 				AnimacionActual = Death; 
