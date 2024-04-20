@@ -219,8 +219,7 @@ const float fps60 = 1000 / 60;
 const float fps120 = 1000 / 120;
 float fps = fps30;
 float timer = 0.0f;
-
-
+bool W_Pressed = false, A_Pressed = false, S_Pressed = false, D_Pressed = false, SPACE_Pressed = false, END_GAME = false, F_Pressed = false, M_Pressed = false;
 //Definicion de funciones
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void LimpiarFondo(int *ptrBuffer, unsigned int color, int area);
@@ -772,51 +771,54 @@ void DibujaPixeles()
 		//Dibujamos el fondo
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario2.pixeles),
 			0, 0,//Iniciamos a dibujar en la ventana en 0,0
-			Mov_fondo,0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario 
+			Mov_fondo, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario 
 			10596, 283,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario2.ancho,
 			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 		//Dibujamos a nuestro personaje
-		TranScaleblt(ptrBufferPixelsWindow, (miPersonaje.HojaSprite.pixeles), 
+		TranScaleblt(ptrBufferPixelsWindow, (miPersonaje.HojaSprite.pixeles),
 			miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw,
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].x, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].y,
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,
-			800, miPersonaje.HojaSprite.ancho, 
+			800, miPersonaje.HojaSprite.ancho,
 			3, 3, TRANSPARENCY, 1);
-		
+
 		//Dibujamos al enemigo
-		
+
 		if (KEYS[input.E]) {
-			
+
 			TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
 				miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].x, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].y,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
 				800, miEnemigo.HojaSprite.ancho,
 				2, 2, TRANSPARENCY_E, 1);
-		}				
-		if(KEYS[input.C])
-		//Dibujamos las monedas
-		TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
-			miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
-			miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].x, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].y,
-			miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
-			800, miMoneda.HojaSprite.ancho,
-			1 ,1 , TRANSPARENCY, 1);
-				
+		}
+		if (KEYS[input.C])
+			//Dibujamos las monedas
+			TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
+				miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
+				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].x, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].y,
+				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
+				800, miMoneda.HojaSprite.ancho,
+				1, 1, TRANSPARENCY, 1);
+
 		//Dibujamos el Level Complete
-		if (Mov_fondo >= 10000){
+		if (!M_Pressed && Mov_fondo <= 10000) {
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),
+				0, 0,
+				0, 0,
+				290, 112,
+				800, misRecursos.Title5.ancho,
+				1, 1, TRANSPARENCY, 1);
+		}
+		if (Mov_fondo >= 10000) {
 			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
 		}
-		if (KEYS[input.M])
-		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
-		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles), 
-			0, 0, 
-			0, 0, 
-			290, 112, 
-			800, misRecursos.Title5.ancho, 
-			1, 1, TRANSPARENCY, 1);
-
+		if (KEYS[input.M]) {
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
+		}
+	
 	}
 
 
@@ -927,7 +929,6 @@ void Frame(float deltatime) {
 
 }
 
-bool W_Pressed = false,A_Pressed = false,S_Pressed = false, D_Pressed = false, SPACE_Pressed = false, END_GAME=false, F_Pressed = false, M_Pressed = false;
 void Movimiento_Enemigo() {
 
 	//Movimeinto en X
