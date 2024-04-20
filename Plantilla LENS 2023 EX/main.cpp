@@ -142,7 +142,7 @@ struct DatosStage{
 }miStage;
 //Recursos
 struct Recursos {
-	int objeto = 4;
+	int objeto = 5;
 	miBitmap Title1;
 	WCHAR Bmp1[MAX_PATH] = L"Recursos/Scott_Pilgrim_Title.bmp";
 	miBitmap Title2;
@@ -151,6 +151,9 @@ struct Recursos {
 	WCHAR Bmp3[MAX_PATH] = L"Recursos/Level_Complete.bmp";
 	miBitmap Title4;
 	WCHAR Bmp4[MAX_PATH] = L"Recursos/Try_Again.bmp";
+	miBitmap Title5;
+	WCHAR Bmp5[MAX_PATH] = L"Recursos/Barra_de_vida.bmp";
+
 }misRecursos;
 
 struct DatosEnemigo {
@@ -427,6 +430,7 @@ void Init()
 	misRecursos.Title2 = gdipLoad(misRecursos.Bmp2); 
 	misRecursos.Title3 = gdipLoad(misRecursos.Bmp3);
 	misRecursos.Title4 = gdipLoad(misRecursos.Bmp4);
+	misRecursos.Title5 = gdipLoad(misRecursos.Bmp5);
 	//Definimos un puntero del total de pixeles que tiene nuestra ventana
 	ptrBufferPixelsWindow = new int[ANCHO_VENTANA * ALTO_VENTANA];
 
@@ -790,10 +794,7 @@ void DibujaPixeles()
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
 				800, miEnemigo.HojaSprite.ancho,
 				2, 2, TRANSPARENCY_E, 1);
-		}
-	
-		
-		
+		}				
 		if(KEYS[input.C])
 		//Dibujamos las monedas
 		TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
@@ -809,7 +810,12 @@ void DibujaPixeles()
 		}
 		if (KEYS[input.M])
 		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
-
+		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles), 
+			0, 0, 
+			0, 0, 
+			290, 112, 
+			800, misRecursos.Title5.ancho, 
+			1, 1, TRANSPARENCY, 1);
 
 	}
 
