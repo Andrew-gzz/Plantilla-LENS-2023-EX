@@ -63,7 +63,11 @@ enum Animaciones_Coin
 	Coin2,
 	Coin3
 };
+enum Animaciones_Piggy {
 
+	Piggy
+
+};
 enum Stages
 {
 	Inicio,
@@ -94,7 +98,7 @@ enum Frames {
 	Frame19,
 	Frame20
 };
-
+//Recursos
 struct DatosPersonaje{
 	//Ruta donde esta nuestra imagen
 	WCHAR BmpW[MAX_PATH] = L"Recursos/Scott_Pilgrim.bmp";
@@ -140,7 +144,6 @@ struct DatosStage{
 	miBitmap ImagenEscenario4;
 	WCHAR Bmp4[MAX_PATH] = L"";
 }miStage;
-//Recursos
 struct Recursos {
 	int objeto = 5;
 	miBitmap Title1;
@@ -155,7 +158,6 @@ struct Recursos {
 	WCHAR Bmp5[MAX_PATH] = L"Recursos/Barra_de_vida.bmp";
 
 }misRecursos;
-
 struct DatosEnemigo {
 
 	WCHAR BmpW[MAX_PATH] = L"Recursos/Enemigo.bmp";
@@ -192,21 +194,37 @@ struct DatosCoins{
 
 	FrameArray** FrameSpriteArray;
 }miMoneda;
+struct DatosPowerUp {
+	WCHAR BmpW[MAX_PATH] = L"Recursos/Piggy_Bank.bmp";
+	miBitmap HojaSprite;
+
+	int XCurrentCoordDraw;
+	int YCurrentCoordDraw;
+
+	int Animaciones_PowerUp = 2;
+
+	int idAnimacionPowerUp = 0;
+	int FramesAnimacionPowerUp = 4;
+
+	FrameArray** FrameSpriteArray;
+}misPowerUp;
 //Variables Globales
 const int ANCHO_VENTANA = 800;
 const int ALTO_VENTANA = 600;
 const int BPP = 4;
 int Mov_fondo = 0;
 //#2EFF82
-const unsigned int TRANSPARENCY = 0xFF2EFF82, TRANSPARENCY_E = 0xFF99D9EA;
+const unsigned int TRANSPARENCY = 0xFF2EFF82, TRANSPARENCY_E = 0xFF99D9EA, TRANSPARENCY_P = 0xFF59D9DB;
 ZPlay* player = CreateZPlay();//Generamos un objeto puntero para nuestro reproductor
 TStreamStatus status;
 bool pausa = false;
 int* ptrBufferPixelsWindow;
-int AnimacionActual, Animacion_E, Animacion_C;
+//Animacion de scott, enemigo, monedas, piggy powerup
+int AnimacionActual, Animacion_E, Animacion_C, Animacion_P;
 int FrameActual = 0, Max_Frame = 0;
 int E_ActualFrame = 0;
 int C_ActualFrame = 0;
+int P_ActualFrame = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
 bool pantallaVictoria = false;
@@ -237,7 +255,8 @@ void ReproductorCambiarCancionYReproduce(int);
 void CargaFramesSprite();
 void CargaFramesSprite_E();
 void CargaFramesSprites_C();
-  
+void CargarFramesPiggy();
+
 int WINAPI wWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR pCmdLine,int nCmdShow)
 {
 	WNDCLASSEX wc;									// Windows Class Structure
@@ -418,7 +437,7 @@ void Init()
 		}else		
 		ReproductorCambiarCancionYReproduce(2);
 	}
-
+	CargarFramesPiggy();
 	CargaFramesSprite();
 	CargaFramesSprite_E();
 	CargaFramesSprites_C();
@@ -433,6 +452,8 @@ void Init()
 	misRecursos.Title3 = gdipLoad(misRecursos.Bmp3);
 	misRecursos.Title4 = gdipLoad(misRecursos.Bmp4);
 	misRecursos.Title5 = gdipLoad(misRecursos.Bmp5);
+
+
 	//Definimos un puntero del total de pixeles que tiene nuestra ventana
 	ptrBufferPixelsWindow = new int[ANCHO_VENTANA * ALTO_VENTANA];
 
@@ -738,6 +759,35 @@ void CargaFramesSprites_C(){
 	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].ancho = 58 ; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].alto = 60;
 }
 
+void CargarFramesPiggy() {
+	//Cargamos primero las hojas de sprite
+	misPowerUp.HojaSprite = gdipLoad(misPowerUp.BmpW);
+
+	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
+	int Coordsp = rand() % (400 - 150 + 1) + 150;
+	misPowerUp.XCurrentCoordDraw = 600; //max 600 min 0
+	misPowerUp.YCurrentCoordDraw = Coordsp; //Max 150 Min 400 
+	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
+
+	//Definiendo las dimenciones en base al # de Animaciones
+	misPowerUp.FrameSpriteArray = new FrameArray * [misPowerUp.Animaciones_PowerUp];
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp] = new FrameArray[misPowerUp.FramesAnimacionPowerUp];
+	//----- -Piggy- ------//
+	//0
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].x = 936; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].y = 1;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].ancho = 94; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].alto = 95;
+	//1
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].x = 839; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].y = 1;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].ancho = 95; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].alto = 95;
+	//3
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].x = 742; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].y = 1;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].ancho = 97; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].alto = 95;
+	//4
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].x = 647; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].y = 1;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].ancho = 95; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].alto = 95;
+
+}
+
 
 /* Funcion principal. Encargada de hacer el redibujado en pantalla cada intervalo (o "Tick") del timer que se haya creado.
 	@param hWnd. Manejador de la ventana.
@@ -771,7 +821,7 @@ void DibujaPixeles()
 	}
 	else if(!pantallaVictoria)
 	{
-		//Dibujamos el fondo
+		//Dibujamos el Primer Escenario
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario2.pixeles),
 			0, 0,//Iniciamos a dibujar en la ventana en 0,0
 			Mov_fondo, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario 
@@ -787,7 +837,6 @@ void DibujaPixeles()
 			3, 3, TRANSPARENCY, 1);
 
 		//Dibujamos al enemigo
-
 		if (KEYS[input.E]) {
 
 			TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
@@ -805,6 +854,15 @@ void DibujaPixeles()
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
 				800, miMoneda.HojaSprite.ancho,
 				1, 1, TRANSPARENCY, 1);
+		//Dibujamos a PIGGY
+		if (KEYS[input.P]) {
+			TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles), 
+				misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
+				misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
+				misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].ancho, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].alto,
+				800, misPowerUp.HojaSprite.ancho,
+				2, 2, TRANSPARENCY_P, 1);
+		}
 
 		//Dibujamos el Level Complete
 		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
@@ -827,6 +885,8 @@ void DibujaPixeles()
 
 }
 bool Current = false;
+//Actualizacion de las animaciones
+//Scott
 void ActualizaAnimacion(HWND hWnd){
 	switch (AnimacionActual) {
 
@@ -896,6 +956,7 @@ void ActualizaAnimacion(HWND hWnd){
 		InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
 }
+//Monedas
 void ActualizaAnimacionC(HWND hWnd) {
 	switch (Animacion_C) {
 	case Coin1:
@@ -907,13 +968,24 @@ void ActualizaAnimacionC(HWND hWnd) {
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
 }
-
+//Enemigo
 void ActualizaAnimacionE(HWND hWnd) {
 	switch (Animacion_E) {
 	case Running_E:
 		E_ActualFrame++;
 		if (E_ActualFrame > 5) E_ActualFrame = 0;
 		break;
+	}
+	InvalidateRect(hWnd, NULL, FALSE);
+	UpdateWindow(hWnd);
+}
+//Piggy(PowerUp)
+void ActualizaAnimacionP(HWND hWnd) {
+	switch (Animacion_P) {
+	case Piggy:
+		P_ActualFrame++; 
+		if (P_ActualFrame > 3) P_ActualFrame = 0; 
+		break; 
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -928,6 +1000,7 @@ void MainRender(HWND hWnd)
 	ActualizaAnimacion(hWnd); 
 	ActualizaAnimacionC(hWnd);
 	ActualizaAnimacionE(hWnd);
+	ActualizaAnimacionP(hWnd);
 	
 }
 
