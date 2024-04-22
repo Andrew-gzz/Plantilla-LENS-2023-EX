@@ -136,7 +136,7 @@ struct DatosStage{
 	miBitmap ImagenEscenario2;
 	WCHAR Bmp2[MAX_PATH] = L"Recursos/Frozen_Suburbs_0.bmp";
 	miBitmap ImagenEscenario3;
-	WCHAR Bmp3[MAX_PATH] = L"";
+	WCHAR Bmp3[MAX_PATH] = L"Recursos/Scott_kiss.bmp";
 	miBitmap ImagenEscenario4;
 	WCHAR Bmp4[MAX_PATH] = L"";
 }miStage;
@@ -209,6 +209,7 @@ int E_ActualFrame = 0;
 int C_ActualFrame = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
+bool pantallaVictoria = false;
 
 const float sinlimite = 0;
 const float fps1 = 1000 / 1;
@@ -425,6 +426,7 @@ void Init()
 	//Cargamos imagen bitmap de nuestro escenario
 	miStage.ImagenEscenario1 = gdipLoad(miStage.Bmp1);
 	miStage.ImagenEscenario2 = gdipLoad(miStage.Bmp2);
+	miStage.ImagenEscenario3 = gdipLoad(miStage.Bmp3);
 	//Cargamos recurso
 	misRecursos.Title1 = gdipLoad(misRecursos.Bmp1);
 	misRecursos.Title2 = gdipLoad(misRecursos.Bmp2); 
@@ -758,7 +760,7 @@ void DibujaPixeles()
 			500, 218,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, misRecursos.Title1.ancho,
 			1, 1, TRANSPARENCY_E, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
-
+		//Dibujamos "Press_any_key"
 		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title2.pixeles),
 			60, 0,//Iniciamos a dibujar en la ventana en 0,0
 			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
@@ -767,7 +769,7 @@ void DibujaPixeles()
 			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 
 	}
-	else
+	else if(!pantallaVictoria)
 	{
 		//Dibujamos el fondo
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario2.pixeles),
@@ -805,21 +807,21 @@ void DibujaPixeles()
 				1, 1, TRANSPARENCY, 1);
 
 		//Dibujamos el Level Complete
-		if (!M_Pressed && Mov_fondo <= 10000) {
-			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),
-				0, 0,
-				0, 0,
-				290, 112,
-				800, misRecursos.Title5.ancho,
-				1, 1, TRANSPARENCY, 1);
-		}
-		if (Mov_fondo >= 10000) {
-			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
-		}
-		if (KEYS[input.M]) {
-			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
-		}
+		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);
+		}		
 	
+	}
+	else {
+		//Pantalla de Victoria Scott_KISS
+		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario3.pixeles),
+			0, 0,//Iniciamos a dibujar en la ventana en 0,0
+			133, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario 
+			1066, 600,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
+			800, miStage.ImagenEscenario3.ancho,
+			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+		//Victoria
+		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
 	}
 
 
@@ -867,8 +869,11 @@ void ActualizaAnimacion(HWND hWnd){
 		}
 		if (DelayFrameAnimation % 1 == 0)
 		{
-			FrameActual++;
-			if (FrameActual > 14) FrameActual = 0;
+			FrameActual++;		
+			if (FrameActual > 14) {				
+				FrameActual = 0; 
+			
+			}
 		}
 
 		//} while (FrameActual>14);
@@ -877,9 +882,14 @@ void ActualizaAnimacion(HWND hWnd){
 	case Death: {
 		
 			FrameActual++;
-			if (FrameActual > 13) FrameActual = 0;
-		
-	
+			//Mostrar texto de muerte
+			if (!M_Pressed) {
+				TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
+			}				
+			if (FrameActual > 13) { 			
+				FrameActual = 0; 
+				AnimacionActual = Idle;
+			}			
 	}break;
 }
 	
@@ -944,12 +954,17 @@ void KeysEvents()
 	int count = 0;
 	if (KEYS[input.Enter] && pantallaInicial == true)
 	{
+		//Setear pantallas
+		pantallaVictoria = false;
 		pantallaInicial = false;
 		Init();
 	}
 	if (KEYS[input.Backspace])
 	{
 		pantallaInicial = true;
+		//resetar todo
+		END_GAME = false;
+		Mov_fondo = 0;
 		ReproductorPausa();
 		Init();
 	}
@@ -990,15 +1005,19 @@ void KeysEvents()
 			{	
 
 					if (Mov_fondo <= 10100) {
-						Mov_fondo += 25;
+						Mov_fondo += 20;
 						AnimacionActual = Dash;
 						D_Pressed = true;
 
 					}
 					else {
+						//Variables para el final del juego
 						END_GAME = true;
-						AnimacionActual = Dance;
 						D_Pressed = true;
+						pantallaVictoria = true;
+
+						//AnimacionActual = Dance;
+						
 					}
 				
 			}
@@ -1011,17 +1030,17 @@ void KeysEvents()
 			}
 			if (KEYS[input.S] || KEYS[input.Down])
 			{				
-				
-			if (miPersonaje.YCurrentCoordDraw >= 370) {
-				AnimacionActual = Walk;
-				S_Pressed = true;
-			}
-			else {
-				miPersonaje.YCurrentCoordDraw += 10;
-				AnimacionActual = Walk;
-				S_Pressed = false;
-			}
-					
+				if (!D_Pressed) {
+					if (miPersonaje.YCurrentCoordDraw >= 370) {
+						AnimacionActual = Walk;
+						S_Pressed = true;
+					}
+					else {
+						miPersonaje.YCurrentCoordDraw += 10;
+						AnimacionActual = Walk;
+						S_Pressed = false;
+					}
+				}					
 			if (miPersonaje.YCurrentCoordDraw <= 360) {
 				miPersonaje.YCurrentCoordDraw += 10;
 			}								
@@ -1064,27 +1083,28 @@ void KeysEvents()
 				}									
 			}else if (SPACE_Pressed) {
 				SPACE_Pressed = false;				  
-				AnimacionActual = Jump;				
+				AnimacionActual = Jump;	
+				FrameActual = 0;
 			}
 			///Baile
 			if (KEYS[input.F]) {			
 					F_Pressed = true;
-					AnimacionActual = Dance;												
+					AnimacionActual = Dance;
 			}
 			else if(F_Pressed){
 				F_Pressed = false;
-				AnimacionActual = Idle;
+				AnimacionActual = Idle; 
 				FrameActual = 0;
 			}
 			//Muerte
 			if (KEYS[input.M]) {
 				M_Pressed = true;
-				AnimacionActual = Death; 
-
+				
 			}
 			else if (M_Pressed) {
 				M_Pressed = false;				
-
+				AnimacionActual = Death;
+				FrameActual = 0;
 			}
 			
 			if (KEYS[input.G]) {							
