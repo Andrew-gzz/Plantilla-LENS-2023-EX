@@ -7,7 +7,11 @@
 #include <cstdlib>//Libreria para utilizar tipos de datos string
 #include "Librerias/Dibujar bitmaps/gdipload.h"
 #include "Librerias/Musica/libzplay.h"
+/*
+Promedio de Pixeles de Scott Aproximadamente Alto:70 Ancho: 40
 
+
+*/
 
 #define Tick 100
 #define Timer 100
@@ -461,6 +465,7 @@ void Init()
 	AnimacionActual = Idle;
 	Animacion_E = Running_E; 
 	Animacion_C = Coin1;
+	Animacion_P = Piggy;  
 }
 
 
@@ -765,7 +770,7 @@ void CargarFramesPiggy() {
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
 	int Coordsp = rand() % (400 - 150 + 1) + 150;
-	misPowerUp.XCurrentCoordDraw = 600; //max 600 min 0
+	misPowerUp.XCurrentCoordDraw = 500; //max 600 min 0
 	misPowerUp.YCurrentCoordDraw = Coordsp; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
