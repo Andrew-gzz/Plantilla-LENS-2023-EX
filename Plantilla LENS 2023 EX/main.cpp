@@ -9,7 +9,7 @@
 #include "Librerias/Musica/libzplay.h"
 /*
 Promedio de Pixeles de Scott Aproximadamente Alto:70 Ancho: 40
-
+Tamaño en Pixeles de la pantalla 800x600 pixeles
 
 */
 
@@ -219,6 +219,7 @@ const int BPP = 4;
 int Mov_fondo = 0;
 //#2EFF82
 const unsigned int TRANSPARENCY = 0xFF2EFF82, TRANSPARENCY_E = 0xFF99D9EA, TRANSPARENCY_P = 0xFF59D9DB;
+const unsigned int Verde = 0xFF00ED20;
 ZPlay* player = CreateZPlay();//Generamos un objeto puntero para nuestro reproductor
 TStreamStatus status;
 bool pausa = false;
@@ -226,6 +227,7 @@ int* ptrBufferPixelsWindow;
 //Animacion de scott, enemigo, monedas, piggy powerup
 int AnimacionActual, Animacion_E, Animacion_C, Animacion_P;
 int FrameActual = 0, Max_Frame = 0;
+//Animaciones Actuales//
 int E_ActualFrame = 0;
 int C_ActualFrame = 0;
 int P_ActualFrame = 0;
@@ -248,6 +250,7 @@ bool W_Pressed = false, A_Pressed = false, S_Pressed = false, D_Pressed = false,
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 void LimpiarFondo(int *ptrBuffer, unsigned int color, int area);
 void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, int inicioYDestino, int inicioXOrigen, int inicioYOrigen, int ancho, int alto, int anchodefondo, int anchodeorigen, int escalaX, int escalaY, const unsigned int TRANSPARENCY, double limiteX);
+void DibujaHitbox(int* ptrBuffer,unsigned int color, int anchoWnd, int altoWnd, int HitboxX, int HitboxY, int HitboxAncho, int HitboxAlto, int escalaX, int escalaY);
 void MainRender(HWND hWnd);
 void Init();
 void KeysEvents();
@@ -840,7 +843,13 @@ void DibujaPixeles()
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,
 			800, miPersonaje.HojaSprite.ancho,
 			3, 3, TRANSPARENCY, 1);
-
+		//Dibujamos La caja de colision del personaje
+	
+		DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+			miPersonaje.XCurrentCoordDraw+300, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
+			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,//Ancho y Alto de la caja
+			3 ,3);//Escala de la caja de colision
+	
 		//Dibujamos al enemigo
 		if (KEYS[input.E]) {
 
@@ -1046,15 +1055,12 @@ void KeysEvents()
 		ReproductorPausa();
 		Init();
 	}
-	if (!END_GAME) {
-
-		if (!pantallaInicial)
+	if (!END_GAME) {//Si Endgame es true, scott llego al final
+		if (!pantallaInicial)//Si no es la pantalla de inicio haz lo siguiente
 		{
-
+			//Movimiento
 			if (KEYS[input.W] || KEYS[input.Up])
 			{
-
-				
 					if (!D_Pressed) {
 						if (miPersonaje.YCurrentCoordDraw >= 130) {
 							miPersonaje.YCurrentCoordDraw -= 10;
@@ -1066,12 +1072,7 @@ void KeysEvents()
 					}
 					if (miPersonaje.YCurrentCoordDraw >= 130) {
 						miPersonaje.YCurrentCoordDraw -= 10;
-					}
-
-				
-				//validación si esta corriendo
-
-				
+					}				
 			}
 			else if (W_Pressed)
 			{
@@ -1083,7 +1084,7 @@ void KeysEvents()
 			{	
 
 					if (Mov_fondo <= 10100) {
-						Mov_fondo += 20;
+						Mov_fondo += 100;
 						AnimacionActual = Dash;
 						D_Pressed = true;
 
@@ -1109,7 +1110,7 @@ void KeysEvents()
 			if (KEYS[input.S] || KEYS[input.Down])
 			{				
 				if (!D_Pressed) {
-					if (miPersonaje.YCurrentCoordDraw >= 370) {
+					if (miPersonaje.YCurrentCoordDraw <= 370) {
 						AnimacionActual = Walk;
 						S_Pressed = true;
 					}
@@ -1119,9 +1120,9 @@ void KeysEvents()
 						S_Pressed = false;
 					}
 				}					
-			if (miPersonaje.YCurrentCoordDraw <= 360) {
-				miPersonaje.YCurrentCoordDraw += 10;
-			}								
+				if (miPersonaje.YCurrentCoordDraw <= 360) {
+					miPersonaje.YCurrentCoordDraw += 10;
+				}								
 			}
 			else if (S_Pressed)
 			{
@@ -1153,13 +1154,14 @@ void KeysEvents()
 				AnimacionActual = Idle; 
 
 			}
-			
+			//Salto
 			if (KEYS[input.Space]) {//KEYS[input.Space]&& KEYS[input.D]
 				if (!D_Pressed && !W_Pressed && !A_Pressed && !S_Pressed) {
 					SPACE_Pressed = true; 
 					Current = true; 
 				}									
-			}else if (SPACE_Pressed) {
+			}
+			else if (SPACE_Pressed) {
 				SPACE_Pressed = false;				  
 				AnimacionActual = Jump;	
 				FrameActual = 0;
@@ -1184,15 +1186,14 @@ void KeysEvents()
 				AnimacionActual = Death;
 				FrameActual = 0;
 			}
-			
+			//Puntuacion
 			if (KEYS[input.G]) {							
 					G_Pressed = true;												
-			}else if (G_Pressed) {
+			}
+			else if (G_Pressed) {
 				G_Pressed = false;
 				MessageBox(NULL, L"Su puntuacion ha sido: ", L"Score", MB_OK | MB_ICONINFORMATION);
 			}
-
-
 		}
 	}
 	
@@ -1316,6 +1317,44 @@ void TranScaleblt(int* punteroDestino, int* punteroOrigen, int inicioXDestino, i
 			add esi, bytesporlineaorigen
 			pop ecx //recuperamos el valor del contador del ciclo exterior
 			loop lazollenarY
+	}
+}
+void DibujaHitbox(int* ptrBuffer,
+	unsigned int color, int anchoWnd, int altoWnd, int HitboxX, int HitboxY, int HitboxAncho, int HitboxAlto, int escalaX, int escalaY)
+{
+	HitboxAncho = HitboxAncho * escalaX;
+	HitboxAlto = HitboxAlto * escalaY;
+	__asm {
+		mov edi, ptrBuffer
+
+		mov eax, HitboxY
+		mul BPP
+		mul anchoWnd
+		add edi, eax
+
+		mov eax, HitboxX
+		mul BPP
+		add edi, eax
+
+		mov eax, color
+
+		mov ecx, HitboxAlto
+		lazo_alto :
+		push ecx
+			mov ecx, HitboxAncho
+			lazo_ancho :
+		mov[edi], eax
+			add edi, BPP
+			//stosd
+			loop lazo_ancho
+			push eax
+			mov eax, anchoWnd
+			sub eax, HitboxAncho
+			mul BPP
+			add edi, eax
+			pop eax
+			pop ecx
+			loop lazo_alto
 	}
 }
 #pragma endregion
