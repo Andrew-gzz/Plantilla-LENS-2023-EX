@@ -24,7 +24,7 @@ struct Musica
 	string Dir;
 	string Nombre;
 };
-Musica Cancion[3];
+Musica Cancion[4];
 
 struct FrameArray{
 	int x,y;
@@ -234,6 +234,7 @@ int P_ActualFrame = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
 bool pantallaVictoria = false;
+bool pantallaNivel = false;
 
 const float sinlimite = 0;
 const float fps1 = 1000 / 1;
@@ -429,20 +430,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void Init()
 {
 	ReproductorInicializaYReproduce();
-	if (!pantallaInicial)
-	{
-		//Empezamos a reproducir musica
-		
-		ReproductorCambiarCancionYReproduce(1); 
-	}
-	else
-	{
+
+	if(pantallaInicial){
 		srand(time(0)); 
 		int M = rand()%100 ; 
 		if (M % 2 == 0) { 
 			ReproductorCambiarCancionYReproduce(0);
 		}else		
 		ReproductorCambiarCancionYReproduce(2);
+	}
+	else if(pantallaNivel)
+	{
+		ReproductorCambiarCancionYReproduce(1); 
+	}
+	else if(pantallaVictoria) {
+		ReproductorCambiarCancionYReproduce(3); 
 	}
 	CargarFramesPiggy();
 	CargaFramesSprite();
@@ -827,7 +829,7 @@ void DibujaPixeles()
 			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 
 	}
-	else if(!pantallaVictoria)
+	else if(pantallaNivel)
 	{
 		//Dibujamos el Primer Escenario
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario2.pixeles),
@@ -880,11 +882,11 @@ void DibujaPixeles()
 
 		//Dibujamos el Level Complete
 		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
-			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);		
 		}		
 	
 	}
-	else {
+	else if(pantallaVictoria){
 		//Pantalla de Victoria Scott_KISS
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario3.pixeles),
 			0, 0,//Iniciamos a dibujar en la ventana en 0,0
@@ -894,6 +896,7 @@ void DibujaPixeles()
 			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 		//Victoria
 		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
+		
 	}
 
 
@@ -1025,12 +1028,6 @@ void Frame(float deltatime) {
 void Movimiento_Enemigo() {
 
 	//Movimeinto en X
-	//for (int i = 600; i > 0; i--) {
-		
-		//miEnemigo.XCurrentCoordDraw += i;
-		//this_thread::sleep_for(chrono::milliseconds(10000)); 
-	//}
-
 
 
 }
@@ -1042,6 +1039,7 @@ void KeysEvents()
 	if (KEYS[input.Enter] && pantallaInicial == true)
 	{
 		//Setear pantallas
+		pantallaNivel = true;
 		pantallaVictoria = false;
 		pantallaInicial = false;
 		Init();
@@ -1084,19 +1082,21 @@ void KeysEvents()
 			{	
 
 					if (Mov_fondo <= 10100) {
-						Mov_fondo += 100;
+						Mov_fondo += 150;
 						AnimacionActual = Dash;
 						D_Pressed = true;
 
 					}
 					else {
 						//Variables para el final del juego
-						END_GAME = true;
-						D_Pressed = true;
+						ReproductorPausa();
+						ReproductorInicializaYReproduce();						
+						ReproductorCambiarCancionYReproduce(3);
+						player->SetMasterVolume(50, 50); 
 						pantallaVictoria = true;
-
-						//AnimacionActual = Dance;
-						
+						pantallaNivel = false;
+						END_GAME = true;
+						D_Pressed = true;						
 					}
 				
 			}
@@ -1366,8 +1366,8 @@ void ReproductorInicializaYReproduce() {
 	Cancion[1].Dir = "Recursos/Audio/Nivel1.mp3";
 	Cancion[2].Nombre = "Inicio_1";
 	Cancion[2].Dir = "Recursos/Audio/Character_Select.mp3";
-	//Cancion[2].Nombre = "Derrota";
-	//Cancion[2].Dir = "Recursos/Mega Man Zero Ost Intermission.mp3";
+	Cancion[3].Nombre = "Victoria";
+	Cancion[3].Dir = "Recursos/Audio/Level_Complete.mp3";
 	ifstream inputFile(Cancion[0].Dir.c_str());
 
 	if (!inputFile.good()) 
