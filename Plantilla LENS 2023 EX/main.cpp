@@ -473,7 +473,6 @@ void Init()
 	Animacion_P = Piggy;  
 }
 
-
 //Scott
 void CargaFramesSprite(){
 	//Cargamos primero las hojas de sprite
@@ -496,50 +495,50 @@ void CargaFramesSprite(){
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath] = new FrameArray[miPersonaje.FramesAnimacionDeath];
 
 	//Cargando Frames a nuestro arreglo del sprite
-	// ------ - Animacion 1 Idle -------- //
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].x = 5; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].alto = 62;
+	// ------ - Animacion 1 Idle -------- // Sprite Corregido
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].x = 5; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].y = 11;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame0].alto = 59;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].x = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].x = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].y = 11;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame1].alto = 59;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].x = 84; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].x = 84; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].y = 11;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame2].alto = 59;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].x = 123; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].x = 123; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].y = 11;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame3].alto = 59;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].x = 162; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].x = 162; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].y = 11;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame4].alto = 59;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].x = 200; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].y = 9;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].x = 200; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].y = 11;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionIdle][Frame5].alto = 59;
 
-	// ------ - Animacion 2 Dash - ------ //
+	// ------ - Animacion 2 Dash - ------ // Sprite Corregido
 	
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].x = 9; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].x = 10; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].y = 77;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame0].alto = 60;
 	
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].x = 50; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].ancho = 42; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].ancho = 43; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame1].alto = 60;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].x = 96; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].ancho = 52; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].ancho = 53; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame2].alto = 60;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].x = 152; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].ancho = 45; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].ancho = 46; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame3].alto = 60;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].x = 201; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame4].alto = 60;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].x = 243; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].ancho = 40; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].ancho = 41; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame5].alto = 60;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].x = 287; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].ancho = 49; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].alto = 62;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].ancho = 50; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame6].alto = 60;
 
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].x = 340; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].y = 77;
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].ancho = 48; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].alto = 62;	
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].ancho = 49; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionCorrer][Frame7].alto = 60;	
 	
 	
 	// ------ - Animacion 3 Saltando - ------ //
@@ -583,24 +582,24 @@ void CargaFramesSprite(){
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].x = 515; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].y = 215;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].ancho = 51; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionJump][Frame12].alto = 77;
 	
-	// ------ - Animacion 2 caminando -------- //
+	// ------ - Animacion 2 caminando -------- //Sprite Corregido
 	
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].x = 7; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].x = 7; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].y = 146;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame0].alto = 64;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].x = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].x = 44; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].y = 146;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].ancho = 38; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame1].alto = 64;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].x = 82; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].x = 82; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].y = 146;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame2].alto = 64;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].x = 119; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].x = 119; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].y = 146;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].ancho = 36; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame3].alto = 64;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].x = 155; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].x = 155; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].y = 146;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame4].alto = 64;
 
-	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].x = 192; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].y = 145;
+	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].x = 192; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].y = 146;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].ancho = 37; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionWalk][Frame5].alto = 64;
 
 	// ------ - Animacion 4 Bailando - ------ //
@@ -649,6 +648,7 @@ void CargaFramesSprite(){
 	//15
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].x = 693; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].y = 1909;
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].ancho = 39; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDance][Frame14].alto = 70;
+
 	// ------ - Animacion 4 Muerte - ------ //
 	//1
 	miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame0].x = 5; miPersonaje.FrameSpriteArray[miPersonaje.idAnimacionDeath][Frame0].y = 1217;
@@ -846,12 +846,11 @@ void DibujaPixeles()
 			800, miPersonaje.HojaSprite.ancho,
 			3, 3, TRANSPARENCY, 1);
 		//Dibujamos La caja de colision del personaje
-	
-		DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
-			miPersonaje.XCurrentCoordDraw+300, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
+		/*DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+			miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,//Ancho y Alto de la caja
 			3 ,3);//Escala de la caja de colision
-	
+		*/
 		//Dibujamos al enemigo
 		if (KEYS[input.E]) {
 
@@ -901,7 +900,7 @@ void DibujaPixeles()
 
 
 }
-bool Current = false;
+bool Current = false; //Validacion si hay alguna animacion en curso inamovible
 //Actualizacion de las animaciones
 //Scott
 void ActualizaAnimacion(HWND hWnd){
@@ -1082,7 +1081,7 @@ void KeysEvents()
 			{	
 
 					if (Mov_fondo <= 10100) {
-						Mov_fondo += 150;
+					//	Mov_fondo += 150;
 						AnimacionActual = Dash;
 						D_Pressed = true;
 
