@@ -219,7 +219,7 @@ const int BPP = 4;
 int Mov_fondo = 0;
 //#2EFF82
 const unsigned int TRANSPARENCY = 0xFF2EFF82, TRANSPARENCY_E = 0xFF99D9EA, TRANSPARENCY_P = 0xFF59D9DB;
-const unsigned int Verde = 0xFF00ED20;
+const unsigned int Verde = 0xFF00ED20, Rojo = 0xFFED1C24, Blanco = 0xFFFFFFFF;
 ZPlay* player = CreateZPlay();//Generamos un objeto puntero para nuestro reproductor
 TStreamStatus status;
 bool pausa = false;
@@ -255,7 +255,7 @@ void DibujaHitbox(int* ptrBuffer,unsigned int color, int anchoWnd, int altoWnd, 
 void MainRender(HWND hWnd);
 void Init();
 void KeysEvents();
-void Movimiento_Enemigo();
+void DetectaColisiones();
 void ReproductorPausa();
 void ReproductorReproduce();
 void ReproductorInicializaYReproduce();
@@ -703,7 +703,7 @@ void CargaFramesSprite_E() {
 	//if(KEYS[input.E])
 	int Coords = rand() % (400 - 150 +1)+150;
 	
-	miEnemigo.XCurrentCoordDraw = 600; //max 600 min 0
+	miEnemigo.XCurrentCoordDraw = 500; //max 600 min 0
 	miEnemigo.YCurrentCoordDraw = Coords; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
@@ -837,7 +837,8 @@ void DibujaPixeles()
 			Mov_fondo, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario 
 			10596, 283,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario2.ancho,
-			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y		
+
 		//Dibujamos a nuestro personaje
 		TranScaleblt(ptrBufferPixelsWindow, (miPersonaje.HojaSprite.pixeles),
 			miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw,
@@ -845,30 +846,25 @@ void DibujaPixeles()
 			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,
 			800, miPersonaje.HojaSprite.ancho,
 			3, 3, TRANSPARENCY, 1);
-		//Dibujamos La caja de colision del personaje
-		/**/DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
-			miPersonaje.XCurrentCoordDraw+200, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
-			miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,//Ancho y Alto de la caja
-			3 ,3);//Escala de la caja de colision
 		
 		//Dibujamos al enemigo
-		if (KEYS[input.E]) {
-
 			TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
 				miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].x, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].y,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
 				800, miEnemigo.HojaSprite.ancho,
 				2, 2, TRANSPARENCY_E, 1);
-		}
-		if (KEYS[input.C])
+
+			DetectaColisiones(); 
+
+		if (KEYS[input.C]){
 			//Dibujamos las monedas
 			TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
 				miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].x, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].y,
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
 				800, miMoneda.HojaSprite.ancho,
-				1, 1, TRANSPARENCY, 1);
+				1, 1, TRANSPARENCY, 1);}
 		//Dibujamos a PIGGY
 		if (KEYS[input.P]) {
 			TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles), 
@@ -882,7 +878,8 @@ void DibujaPixeles()
 		//Dibujamos el Level Complete
 		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
 			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);		
-		}		
+		}
+
 	
 	}
 	else if(pantallaVictoria){
@@ -900,7 +897,8 @@ void DibujaPixeles()
 
 
 }
-bool Current = false; //Validacion si hay alguna animacion en curso inamovible
+bool Current = false; //Validacion si la animacion de salto esta Activa
+bool Active_Animation = true; //Validacion si hay alguna animacion en curso 
 //Actualizacion de las animaciones
 //Scott
 void ActualizaAnimacion(HWND hWnd){
@@ -917,12 +915,24 @@ void ActualizaAnimacion(HWND hWnd){
 		FrameActual++;
 		if (FrameActual > 7) FrameActual = 0;
 	}break;
-	case Jump: {		
+	case Jump: {	
+		if (Active_Animation == true) {
+			FrameActual = 0;
+			Active_Animation = false;
+			}
 			FrameActual++;
-			if (FrameActual > 12) {
+			if (FrameActual == 0) miPersonaje.YCurrentCoordDraw -= 25;
+			if (FrameActual == 1) miPersonaje.YCurrentCoordDraw -= 25;
+			if (FrameActual == 3) miPersonaje.YCurrentCoordDraw -= 25;
+			if (FrameActual == 5) miPersonaje.YCurrentCoordDraw -= 25;
+			if (FrameActual == 7) miPersonaje.YCurrentCoordDraw += 25;
+			if (FrameActual == 9) miPersonaje.YCurrentCoordDraw += 25;
+			if (FrameActual == 11) miPersonaje.YCurrentCoordDraw += 25;
+			if (FrameActual > 12) {//Mientras los frames no superen 12 seguira haciendo la animacion de saltar
 				Current = false;
 				FrameActual = 0;
-				AnimacionActual = Idle;								
+				AnimacionActual = Idle;
+				Active_Animation = true;
 			} 
 
 	}break;
@@ -989,6 +999,12 @@ void ActualizaAnimacionE(HWND hWnd) {
 	switch (Animacion_E) {
 	case Running_E:
 		E_ActualFrame++;
+		if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 20;
+		if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 20;
+		if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 20;
+		if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 20;
+		if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 20;
+		if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 20;
 		if (E_ActualFrame > 5) E_ActualFrame = 0;
 		break;
 	}
@@ -1010,8 +1026,7 @@ void ActualizaAnimacionP(HWND hWnd) {
 void MainRender(HWND hWnd) 
 {
 	LimpiarFondo(ptrBufferPixelsWindow, 0xFFFFFFFF, (ANCHO_VENTANA * ALTO_VENTANA));
-	KeysEvents();
-	Movimiento_Enemigo();
+	KeysEvents();	
 	DibujaPixeles();
 	ActualizaAnimacion(hWnd); 
 	ActualizaAnimacionC(hWnd);
@@ -1024,9 +1039,36 @@ void Frame(float deltatime) {
 
 }
 
-void Movimiento_Enemigo() {
+void DetectaColisiones() {
+	//Colison extrema izq
+	DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+		0, 0, //Cordenadas de la caja de colision
+		20, 600,//Ancho y Alto de la caja
+		1, 1);//Escala de la caja de colision
+	//Colision del enemigo
+		DibujaHitbox(ptrBufferPixelsWindow, Rojo, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+		miEnemigo.XCurrentCoordDraw , miEnemigo.YCurrentCoordDraw, //Cordenadas de la caja de colision
+		miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,//Ancho y Alto de la caja
+		1, 1);//Escala de la caja de colision
+	//Colision de Scott Pilgrim	
+		DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+		miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
+		miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,//Ancho y Alto de la caja
+		3 ,3);//Escala de la caja de colision
 
-	//Movimeinto en X
+		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho &&
+			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
+			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto &&
+			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > miPersonaje.YCurrentCoordDraw) {
+
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1); 
+		}
+		else if (miEnemigo.XCurrentCoordDraw < 15 + 15 && miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
+			miEnemigo.YCurrentCoordDraw < 585 && miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > 0) {
+			// Generar nuevas coordenadas aleatorias para el enemigo
+			miEnemigo.XCurrentCoordDraw = 660; // max 600 min 0
+			miEnemigo.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+		}
 
 
 }
@@ -1060,7 +1102,7 @@ void KeysEvents()
 			{
 					if (!D_Pressed) {
 						if (miPersonaje.YCurrentCoordDraw >= 130) {
-							miPersonaje.YCurrentCoordDraw -= 10;
+							miPersonaje.YCurrentCoordDraw -= 15;
 							AnimacionActual = Walk;
 							W_Pressed = true;
 						}
@@ -1068,7 +1110,7 @@ void KeysEvents()
 						W_Pressed = true;
 					}
 					if (miPersonaje.YCurrentCoordDraw >= 130) {
-						miPersonaje.YCurrentCoordDraw -= 10;
+						miPersonaje.YCurrentCoordDraw -= 15;
 					}				
 			}
 			else if (W_Pressed)
@@ -1080,23 +1122,46 @@ void KeysEvents()
 			if (KEYS[input.D] || KEYS[input.Right])
 			{	
 
-					if (Mov_fondo <= 10100) {
-						Mov_fondo += 150;
+				if (Mov_fondo <= 10100) {
+					/*if (Current == true) {
+						Mov_fondo += 25;
+						D_Pressed = true;
+					}
+					if (KEYS[input.Space]) {
+							
+						AnimacionActual = Jump;						
+						Mov_fondo += 25;
+					}
+					else if(Current != false)
+					{
+						Mov_fondo += 20;
 						AnimacionActual = Dash;
 						D_Pressed = true;
-
+					}*/
+					if (KEYS[input.Space]) {
+						Mov_fondo += 20;
+						AnimacionActual = Jump;
+						Current = true; 
+					}else if(Current==true) {
+						Mov_fondo += 20;
 					}
 					else {
-						//Variables para el final del juego
-						ReproductorPausa();
-						ReproductorInicializaYReproduce();						
-						ReproductorCambiarCancionYReproduce(3);
-						player->SetMasterVolume(50, 50); 
-						pantallaVictoria = true;
-						pantallaNivel = false;
-						END_GAME = true;
-						D_Pressed = true;						
+						Mov_fondo += 15;
+						AnimacionActual = Dash;
+						D_Pressed = true;
 					}
+
+				}
+				else {
+					//Variables para el final del juego
+					ReproductorPausa();
+					ReproductorInicializaYReproduce();						
+					ReproductorCambiarCancionYReproduce(3); 
+					pantallaVictoria = true;
+					pantallaNivel = false;
+					END_GAME = true;
+					D_Pressed = true;						
+				}
 				
 			}
 			else if (D_Pressed)
@@ -1114,13 +1179,13 @@ void KeysEvents()
 						S_Pressed = true;
 					}
 					else {
-						miPersonaje.YCurrentCoordDraw += 10;
+						miPersonaje.YCurrentCoordDraw += 15;
 						AnimacionActual = Walk;
 						S_Pressed = false;
 					}
 				}					
 				if (miPersonaje.YCurrentCoordDraw <= 360) {
-					miPersonaje.YCurrentCoordDraw += 10;
+					miPersonaje.YCurrentCoordDraw += 15;
 				}								
 			}
 			else if (S_Pressed)
@@ -1154,6 +1219,7 @@ void KeysEvents()
 
 			}
 			//Salto
+			/**/
 			if (KEYS[input.Space]) {//KEYS[input.Space]&& KEYS[input.D]
 				if (!D_Pressed && !W_Pressed && !A_Pressed && !S_Pressed) {
 					SPACE_Pressed = true; 
