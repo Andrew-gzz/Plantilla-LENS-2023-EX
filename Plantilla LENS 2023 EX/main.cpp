@@ -238,10 +238,11 @@ bool pantallaVictoria = false;
 bool pantallaNivel = false;
 bool Estatus = true; // false = muerto true = vivo
 //Codigo para el Score
+bool ActiveScore = false;
 float MUL = 0.1;
 time_t tiempoInicio; 
 int Segundos;
-int PuntajeT;
+float PuntajeT;
 
 const float sinlimite = 0;
 const float fps1 = 1000 / 1;
@@ -1075,7 +1076,7 @@ bool DetectaColisiones() {
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
 			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto - 100 > miPersonaje.YCurrentCoordDraw) {
-			return false;
+			return true;
 			
 		}else
 	if (miEnemigo.XCurrentCoordDraw < 15 + 15 && 
@@ -1091,9 +1092,25 @@ bool DetectaColisiones() {
 }
 
 void Puntaje(int seg) {
-	PuntajeT += seg;
-	wstring mensaje = L"Su puntuacion ha sido: " + to_wstring(PuntajeT);
-	MessageBox(NULL, mensaje.c_str(), L"Score", MB_OK | MB_ICONINFORMATION);
+
+	if (seg < 80) {
+		PuntajeT += (2000 + 600) * 2;
+	}
+	else if (80 <= seg < 100) {
+		PuntajeT += (1500 + 600) * 1;
+	}
+	else if (100<=seg<120) {
+		PuntajeT += (1000 + 600) * .5;
+	}
+	else if (seg>120)
+	{
+		PuntajeT += 0;
+	}
+	if (!ActiveScore) {
+		ActiveScore = true;
+		wstring mensaje = L"Su puntuacion ha sido: " + to_wstring(PuntajeT);
+		MessageBox(NULL, mensaje.c_str(), L"Score", MB_OK | MB_ICONINFORMATION);
+	}
 }
 
 bool SpacePressed = false;
@@ -1108,6 +1125,7 @@ void KeysEvents()
 		Estatus = true;
 		pantallaVictoria = false;
 		pantallaInicial = false;
+		ActiveScore = false;
 		time(&tiempoInicio); 
 		Init();
 	}
@@ -1182,7 +1200,12 @@ void KeysEvents()
 					//Variables para el final del juego
 					ReproductorPausa();
 					ReproductorInicializaYReproduce();						
-					ReproductorCambiarCancionYReproduce(3); 				
+					ReproductorCambiarCancionYReproduce(3); 
+					PuntajeT = 0; 
+					time_t tiempoFinal; 
+					time(&tiempoFinal); 
+					Segundos = Tiempo(tiempoInicio, tiempoFinal); 
+					Puntaje(Segundos); 
 					pantallaVictoria = true;
 					pantallaNivel = false;
 					END_GAME = true;
