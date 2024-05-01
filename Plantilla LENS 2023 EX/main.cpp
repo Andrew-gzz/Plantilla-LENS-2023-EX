@@ -728,23 +728,23 @@ void CargaFramesSprite_E() {
 
 	// ------ - Animacion 1 Corriendo - ------ //
 	//0
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].x = 607; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].y = 504;
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].ancho = 78; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].alto = 180; 
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].x = 609; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].y = 506;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].ancho = 74; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame0].alto = 81; 
 	//1
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].x = 527; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].y = 504;
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].ancho = 80; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].alto = 180;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].x = 529; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].y = 506;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].ancho = 77; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame1].alto = 81;
 	//3
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].x = 448; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].y = 504;
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].ancho = 79; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].alto = 180;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].x = 450; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].y = 506;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].ancho = 76; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame2].alto = 81;
 	//4
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].x = 371; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].y = 504;
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].ancho = 80; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].alto = 180;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].x = 373; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].y = 506;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].ancho = 74; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame3].alto = 81;
 	//5
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].x = 291; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].y = 504;
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].ancho = 80; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].alto = 180;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].x = 293; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].y = 506;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].ancho = 77; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame4].alto = 81;
 	//6
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].x = 212; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].y = 504;
-	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].ancho = 79; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].alto = 180;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].x = 214; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].y = 506;
+	miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].ancho = 76; miEnemigo.FrameSpriteArray[miEnemigo.idAnimacionRunning][Frame5].alto = 81;//180
 
 }
 //Monedas
@@ -764,23 +764,23 @@ void CargaFramesSprites_C(){
 	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1] = new FrameArray[miMoneda.FramesAnimacionCoin1]; 
 	// ------ - Animacion 1 Moneda 1- ------ //
 	//0
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].x = 20; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].y = 132;
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].ancho = 43; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].alto = 60;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].x = 22; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].y = 134;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].ancho = 39; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].alto = 57;
 	//1
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].x = 63; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].y = 132;
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].ancho = 21; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].alto = 60;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].x = 66; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].y = 134;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].ancho = 15; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame1].alto = 57;
 	//3
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].x = 84; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].y = 132;
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].ancho = 46; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].alto = 60;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].x = 88; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].y = 134;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].ancho = 39; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame2].alto = 57;
 	//4
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].x = 130; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].y = 132;
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].ancho = 49; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].alto = 60;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].x = 134; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].y = 134;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].ancho = 51; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame3].alto = 57;
 	//5
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].x = 189; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].y = 132;
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].ancho = 67; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].alto = 60;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].x = 194; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].y = 134;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].ancho = 57; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame4].alto = 57;
 	//6
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].x = 256; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].y = 132;
-	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].ancho = 58 ; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].alto = 60;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].x = 262; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].y = 134;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].ancho = 51 ; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].alto = 57;
 }
 
 void CargarFramesPiggy() {
@@ -868,20 +868,20 @@ void DibujaPixeles()
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
 				800, miEnemigo.HojaSprite.ancho,
 				1, 1, TRANSPARENCY_E, 1);
-
-			DetectaColisiones(); 
-			if (!DetectaColisiones()) {				
-				AnimacionActual = Death;
-				Estatus = false;
-			}
-		if (KEYS[input.C]){
-			//Dibujamos las monedas
+	
+		//Dibujamos las monedas
 			TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
 				miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw,
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].x, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].y,
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
 				800, miMoneda.HojaSprite.ancho,
-				1, 1, TRANSPARENCY, 1);}
+				1, 1, TRANSPARENCY, 1);
+
+			DetectaColisiones(); 
+				if (!DetectaColisiones()) {				
+					AnimacionActual = Death;
+					Estatus = false;
+				}
 		//Dibujamos a PIGGY
 		if (KEYS[input.P]) {
 			TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles), 
@@ -998,10 +998,16 @@ void ActualizaAnimacion(HWND hWnd){
 void ActualizaAnimacionC(HWND hWnd) {
 	switch (Animacion_C) {
 	case Coin1:
-
-	C_ActualFrame++;
-	if (C_ActualFrame > 5 ) C_ActualFrame = 0;
-		
+		if (C_ActualFrame == 0) miMoneda.XCurrentCoordDraw -= 30;
+		if (C_ActualFrame == 1) miMoneda.XCurrentCoordDraw -= 30;
+		if (C_ActualFrame == 2) miMoneda.XCurrentCoordDraw -= 30;
+		if (C_ActualFrame == 3) miMoneda.XCurrentCoordDraw -= 30;
+		if (C_ActualFrame == 4) miMoneda.XCurrentCoordDraw -= 30;
+		if (C_ActualFrame == 5) miMoneda.XCurrentCoordDraw -= 30;
+		if (C_ActualFrame == 6) miMoneda.XCurrentCoordDraw -= 30;
+		C_ActualFrame++;
+		if (C_ActualFrame > 5 ) C_ActualFrame = 0;
+		break;
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -1012,12 +1018,12 @@ void ActualizaAnimacionE(HWND hWnd) {
 	case Running_E:
 		E_ActualFrame++;
 		if (Estatus) {
-			if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 20;
-			if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 20;
-			if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 20;
-			if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 20;
-			if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 20;
-			if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 20;
+			if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 25;
+			if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 25;
+			if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 25;
+			if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 25;
+			if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 25;
+			if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 25;
 		}		
 		if (E_ActualFrame > 5) E_ActualFrame = 0;
 		break;
@@ -1063,31 +1069,38 @@ bool DetectaColisiones() {
 	//Colision del enemigo
 		DibujaHitbox(ptrBufferPixelsWindow, Rojo, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		miEnemigo.XCurrentCoordDraw , miEnemigo.YCurrentCoordDraw, //Cordenadas de la caja de colision
-		miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto-100,//Ancho y Alto de la caja
+		miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, 81,//Ancho y Alto de la caja
 		1, 1);//Escala de la caja de colision
-
 	//Colision de Scott Pilgrim	
 		DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
 		miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100,//Ancho y Alto de la caja
-		1 ,1);//Escala de la caja de colision*/
-	/**/ 
+		1 ,1);//Escala de la caja de colision */
 		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
-			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto - 100 > miPersonaje.YCurrentCoordDraw) {
-			return true;
+			miEnemigo.YCurrentCoordDraw + 81  > miPersonaje.YCurrentCoordDraw) {
+			return false;
 			
-		}else
-	if (miEnemigo.XCurrentCoordDraw < 15 + 15 && 
+		}
+		else {
+			if (miEnemigo.XCurrentCoordDraw < 15 + 15 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
 			miEnemigo.YCurrentCoordDraw < 585 && 
 			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > 0) {
 			// Generar nuevas coordenadas aleatorias para el enemigo
 			miEnemigo.XCurrentCoordDraw = 660; // max 600 min 0
 			miEnemigo.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-		}
-
+			}
+			if (miMoneda.XCurrentCoordDraw < 15 + 15 &&
+				miMoneda.XCurrentCoordDraw + miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho + 70 > 20 &&
+				miMoneda.YCurrentCoordDraw < 585 &&
+				miMoneda.YCurrentCoordDraw + miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto > 0) {
+				
+				miMoneda.XCurrentCoordDraw = 660; 
+				miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+			}
+}
 
 }
 
