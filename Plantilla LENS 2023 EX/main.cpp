@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>   // Necesario para la función sleep_for
 #include <chrono>
+#include <ctime>  
 #include <cstdlib>//Libreria para utilizar tipos de datos string
 #include "Librerias/Dibujar bitmaps/gdipload.h"
 #include "Librerias/Musica/libzplay.h"
@@ -18,7 +19,7 @@ Tamaño en Pixeles de la pantalla 800x600 pixeles
 
 using namespace libZPlay;//Se declara que se usara la libreria de libZPlay para reproductor de musica
 using namespace std; //Utiliza el espacio de nombres de la libreria STD de c++
-
+unsigned int i=20, d=20;//Volumen de la musica
 struct Musica
 {
 	string Dir;
@@ -235,6 +236,12 @@ int DelayFrameAnimation=0;
 bool pantallaInicial = true;
 bool pantallaVictoria = false;
 bool pantallaNivel = false;
+bool Estatus = true; // false = muerto true = vivo
+//Codigo para el Score
+float MUL = 0.1;
+time_t tiempoInicio; 
+int Segundos;
+int PuntajeT;
 
 const float sinlimite = 0;
 const float fps1 = 1000 / 1;
@@ -255,7 +262,8 @@ void DibujaHitbox(int* ptrBuffer,unsigned int color, int anchoWnd, int altoWnd, 
 void MainRender(HWND hWnd);
 void Init();
 void KeysEvents();
-void DetectaColisiones();
+bool DetectaColisiones();
+void Puntaje(int);
 void ReproductorPausa();
 void ReproductorReproduce();
 void ReproductorInicializaYReproduce();
@@ -264,6 +272,11 @@ void CargaFramesSprite();
 void CargaFramesSprite_E();
 void CargaFramesSprites_C();
 void CargarFramesPiggy();
+int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal);
+// Función para calcular el tiempo transcurrido en segundos
+int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal) {
+	return (int)difftime(tiempoFinal, tiempoInicio); // Convertir de milisegundos a segundos 
+}
 
 int WINAPI wWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR pCmdLine,int nCmdShow)
 {
@@ -480,7 +493,7 @@ void CargaFramesSprite(){
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
 	miPersonaje.XCurrentCoordDraw = 100;
-	miPersonaje.YCurrentCoordDraw = 300;
+	miPersonaje.YCurrentCoordDraw = 360;
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
 
@@ -853,10 +866,13 @@ void DibujaPixeles()
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].x, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].y,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
 				800, miEnemigo.HojaSprite.ancho,
-				2, 2, TRANSPARENCY_E, 1);
+				1, 1, TRANSPARENCY_E, 1);
 
 			DetectaColisiones(); 
-
+			if (!DetectaColisiones()) {				
+				AnimacionActual = Death;
+				Estatus = false;
+			}
 		if (KEYS[input.C]){
 			//Dibujamos las monedas
 			TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
@@ -878,9 +894,7 @@ void DibujaPixeles()
 		//Dibujamos el Level Complete
 		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
 			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);		
-		}
-
-	
+		}	
 	}
 	else if(pantallaVictoria){
 		//Pantalla de Victoria Scott_KISS
@@ -895,7 +909,6 @@ void DibujaPixeles()
 		
 	}
 
-
 }
 bool Current = false; //Validacion si la animacion de salto esta Activa
 bool Active_Animation = true; //Validacion si hay alguna animacion en curso 
@@ -904,80 +917,78 @@ bool Active_Animation = true; //Validacion si hay alguna animacion en curso
 void ActualizaAnimacion(HWND hWnd){
 	switch (AnimacionActual) {
 
-	case Idle:
+		case Idle:
 
-	FrameActual++;
-	if (FrameActual > 5) FrameActual = 0;			
-
-		break;
-
-	case Dash: {
 		FrameActual++;
-		if (FrameActual > 7) FrameActual = 0;
-	}break;
-	case Jump: {	
-		if (Active_Animation == true) {
-			FrameActual = 0;
-			Active_Animation = false;
-			}
+		if (FrameActual > 5) FrameActual = 0;			
+
+			break;
+
+		case Dash: {
+
 			FrameActual++;
-			if (FrameActual == 0) miPersonaje.YCurrentCoordDraw -= 25;
-			if (FrameActual == 1) miPersonaje.YCurrentCoordDraw -= 25;
-			if (FrameActual == 3) miPersonaje.YCurrentCoordDraw -= 25;
-			if (FrameActual == 5) miPersonaje.YCurrentCoordDraw -= 25;
-			if (FrameActual == 7) miPersonaje.YCurrentCoordDraw += 25;
-			if (FrameActual == 9) miPersonaje.YCurrentCoordDraw += 25;
-			if (FrameActual == 11) miPersonaje.YCurrentCoordDraw += 25;
-			if (FrameActual > 12) {//Mientras los frames no superen 12 seguira haciendo la animacion de saltar
-				Current = false;
+			if (FrameActual > 7) {
+				FrameActual = 0;				
+			}
+		}break;
+		case Jump: {	
+			if (Active_Animation == true) {
 				FrameActual = 0;
-				AnimacionActual = Idle;
-				Active_Animation = true;
-			} 
+				Active_Animation = false;
+				}
+				FrameActual++;
+				if (FrameActual == 0) miPersonaje.YCurrentCoordDraw -= 40;
+				if (FrameActual == 1) miPersonaje.YCurrentCoordDraw -= 40;
+				if (FrameActual == 3) miPersonaje.YCurrentCoordDraw -= 40;
+				if (FrameActual == 5) miPersonaje.YCurrentCoordDraw -= 40;
+				if (FrameActual == 7) miPersonaje.YCurrentCoordDraw += 40;
+				if (FrameActual == 9) miPersonaje.YCurrentCoordDraw += 40;
+				if (FrameActual == 11) miPersonaje.YCurrentCoordDraw += 40;
+				if (FrameActual > 12) {//Mientras los frames no superen 12 seguira haciendo la animacion de saltar
+					Current = false;
+					FrameActual = 0;
+					AnimacionActual = Idle;
+					Active_Animation = true;
+				} 
 
-	}break;
-	case Walk: {
-		FrameActual++;
-		if (FrameActual > 5) {		
-			FrameActual = 0;
-		}
-			
-	}break;
-	case Dance: {
-		//do {
-		if (Tick % Tick == 0 && FrameActual == 0)//125
-		{
-			DelayFrameAnimation++;
-		}
-		else if (Tick % Tick == 0 && FrameActual == 7)
-		{
-			DelayFrameAnimation += 5;
-		}
-		if (DelayFrameAnimation % 1 == 0)
-		{
-			FrameActual++;		
-			if (FrameActual > 14) {				
-				FrameActual = 0; 
-			
-			}
-		}
-
-		//} while (FrameActual>14);
-
-	}break;
-	case Death: {
-		
+		}break;
+		case Walk: {
 			FrameActual++;
-			//Mostrar texto de muerte
-			if (!M_Pressed) {
-				TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
-			}				
+			if (FrameActual > 5) {		
+				FrameActual = 0;
+			}
+			
+		}break;
+		case Dance: {
+			//do {
+			if (Tick % Tick == 0 && FrameActual == 0)//125
+			{
+				DelayFrameAnimation++;
+			}
+			else if (Tick % Tick == 0 && FrameActual == 7)
+			{
+				DelayFrameAnimation += 5;
+			}
+			if (DelayFrameAnimation % 1 == 0)
+			{
+				FrameActual++;		
+				if (FrameActual > 14) {				
+					FrameActual = 0; 
+			
+				}
+			}
+
+			//} while (FrameActual>14);
+
+		}break;
+		case Death: {
+			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1);
+			FrameActual++;
 			if (FrameActual > 13) { 			
-				FrameActual = 0; 
-				AnimacionActual = Idle;
+				FrameActual = 13;
 			}			
-	}break;
-}
+		}break;
+	}
 	
 		InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -999,12 +1010,14 @@ void ActualizaAnimacionE(HWND hWnd) {
 	switch (Animacion_E) {
 	case Running_E:
 		E_ActualFrame++;
-		if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 20;
-		if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 20;
-		if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 20;
-		if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 20;
-		if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 20;
-		if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 20;
+		if (Estatus) {
+			if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 20;
+			if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 20;
+			if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 20;
+			if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 20;
+			if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 20;
+			if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 20;
+		}		
 		if (E_ActualFrame > 5) E_ActualFrame = 0;
 		break;
 	}
@@ -1039,32 +1052,36 @@ void Frame(float deltatime) {
 
 }
 
-void DetectaColisiones() {
+bool DetectaColisiones() {
 	//Colison extrema izq
-	DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+	/*DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		0, 0, //Cordenadas de la caja de colision
 		20, 600,//Ancho y Alto de la caja
 		1, 1);//Escala de la caja de colision
+	
 	//Colision del enemigo
 		DibujaHitbox(ptrBufferPixelsWindow, Rojo, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		miEnemigo.XCurrentCoordDraw , miEnemigo.YCurrentCoordDraw, //Cordenadas de la caja de colision
-		miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,//Ancho y Alto de la caja
+		miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto-100,//Ancho y Alto de la caja
 		1, 1);//Escala de la caja de colision
+
 	//Colision de Scott Pilgrim	
 		DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
-		miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto,//Ancho y Alto de la caja
-		3 ,3);//Escala de la caja de colision
-
-		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho &&
+		miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100,//Ancho y Alto de la caja
+		1 ,1);//Escala de la caja de colision*/
+	/**/ 
+		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
-			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto &&
-			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > miPersonaje.YCurrentCoordDraw) {
-
-			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title4.pixeles), 10, 400, 0, 0, 749, 98, 800, misRecursos.Title4.ancho, 1, 1, TRANSPARENCY, 1); 
-		}
-		else if (miEnemigo.XCurrentCoordDraw < 15 + 15 && miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
-			miEnemigo.YCurrentCoordDraw < 585 && miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > 0) {
+			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
+			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto - 100 > miPersonaje.YCurrentCoordDraw) {
+			return false;
+			
+		}else
+	if (miEnemigo.XCurrentCoordDraw < 15 + 15 && 
+			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
+			miEnemigo.YCurrentCoordDraw < 585 && 
+			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > 0) {
 			// Generar nuevas coordenadas aleatorias para el enemigo
 			miEnemigo.XCurrentCoordDraw = 660; // max 600 min 0
 			miEnemigo.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
@@ -1072,6 +1089,13 @@ void DetectaColisiones() {
 
 
 }
+
+void Puntaje(int seg) {
+	PuntajeT += seg;
+	wstring mensaje = L"Su puntuacion ha sido: " + to_wstring(PuntajeT);
+	MessageBox(NULL, mensaje.c_str(), L"Score", MB_OK | MB_ICONINFORMATION);
+}
+
 bool SpacePressed = false;
 
 void KeysEvents()
@@ -1081,8 +1105,10 @@ void KeysEvents()
 	{
 		//Setear pantallas
 		pantallaNivel = true;
+		Estatus = true;
 		pantallaVictoria = false;
 		pantallaInicial = false;
+		time(&tiempoInicio); 
 		Init();
 	}
 	if (KEYS[input.Backspace])
@@ -1094,7 +1120,7 @@ void KeysEvents()
 		ReproductorPausa();
 		Init();
 	}
-	if (!END_GAME) {//Si Endgame es true, scott llego al final
+	if (!END_GAME && Estatus) {//Si Endgame es true, scott llego al final
 		if (!pantallaInicial)//Si no es la pantalla de inicio haz lo siguiente
 		{
 			//Movimiento
@@ -1156,7 +1182,7 @@ void KeysEvents()
 					//Variables para el final del juego
 					ReproductorPausa();
 					ReproductorInicializaYReproduce();						
-					ReproductorCambiarCancionYReproduce(3); 
+					ReproductorCambiarCancionYReproduce(3); 				
 					pantallaVictoria = true;
 					pantallaNivel = false;
 					END_GAME = true;
@@ -1174,19 +1200,17 @@ void KeysEvents()
 			if (KEYS[input.S] || KEYS[input.Down])
 			{				
 				if (!D_Pressed) {
-					if (miPersonaje.YCurrentCoordDraw <= 370) {
+
+					if (miPersonaje.YCurrentCoordDraw > 360) {
 						AnimacionActual = Walk;
 						S_Pressed = true;
 					}
 					else {
-						miPersonaje.YCurrentCoordDraw += 15;
+						miPersonaje.YCurrentCoordDraw += 12;
 						AnimacionActual = Walk;
-						S_Pressed = false;
+						S_Pressed = true;
 					}
 				}					
-				if (miPersonaje.YCurrentCoordDraw <= 360) {
-					miPersonaje.YCurrentCoordDraw += 15;
-				}								
 			}
 			else if (S_Pressed)
 			{
@@ -1241,23 +1265,18 @@ void KeysEvents()
 				AnimacionActual = Idle; 
 				FrameActual = 0;
 			}
-			//Muerte
-			if (KEYS[input.M]) {
-				M_Pressed = true;
-				
-			}
-			else if (M_Pressed) {
-				M_Pressed = false;				
-				AnimacionActual = Death;
-				FrameActual = 0;
-			}
+
 			//Puntuacion
 			if (KEYS[input.G]) {							
 					G_Pressed = true;												
 			}
 			else if (G_Pressed) {
 				G_Pressed = false;
-				MessageBox(NULL, L"Su puntuacion ha sido: ", L"Score", MB_OK | MB_ICONINFORMATION);
+				PuntajeT = 0;
+				time_t tiempoFinal; 
+				time(&tiempoFinal); 
+				Segundos = Tiempo(tiempoInicio, tiempoFinal);   
+				Puntaje(Segundos);  			
 			}
 		}
 	}
@@ -1439,7 +1458,7 @@ void ReproductorInicializaYReproduce() {
 		printf("No file found");
 	else 
 		player->OpenFile(Cancion[0].Dir.c_str(), sfAutodetect);
-	player->SetMasterVolume(20, 20);// Sonido tipo estereo Left and Right - Volumen de 0 - 100
+	player->SetMasterVolume(i, d);// Sonido tipo estereo Left and Right - Volumen de 0 - 100
 	player->Play();
 }
 
