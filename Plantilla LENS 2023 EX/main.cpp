@@ -249,6 +249,11 @@ time_t tiempoInicio;
 int Segundos;
 int Moneda1 = 0;
 float PuntajeT;
+//Codigo para PowerUps
+
+bool P_Power = false;
+int F_Velocidad = 15;
+int Piggy_Estatus = 0;
 
 const float sinlimite = 0;
 const float fps1 = 1000 / 1;
@@ -408,8 +413,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					}
 				}
 				if (Estatus == true) {//Se detiene el fondo si moriste
-				Mov_fondo += 12;
+					if (F_Velocidad > 15) {
+						F_Velocidad -= 2;
+					}
+				Mov_fondo += F_Velocidad;//Suma velocidad
 				miMoneda.XCurrentCoordDraw -= 30;
+				misPowerUp.XCurrentCoordDraw -= 40;
 				miEnemigo.XCurrentCoordDraw -= E_Velocidad;
 				}
 				if (Mov_fondo >= 10100) {//Cuando llega al final hace lo siguiente
@@ -809,7 +818,7 @@ void CargarFramesPiggy() {
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
 	int Coordsp = rand() % (400 - 150 + 1) + 150;
-	misPowerUp.XCurrentCoordDraw = 500; //max 600 min 0
+	misPowerUp.XCurrentCoordDraw = 700; //max 600 min 0
 	misPowerUp.YCurrentCoordDraw = Coordsp; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
@@ -818,17 +827,17 @@ void CargarFramesPiggy() {
 	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp] = new FrameArray[misPowerUp.FramesAnimacionPowerUp];
 	//----- -Piggy- ------//
 	//0
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].x = 936; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].y = 1;
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].ancho = 94; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].alto = 95;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].x = 938; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].y = 3;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].ancho = 92; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].alto = 91;
 	//1
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].x = 839; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].y = 1;
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].ancho = 95; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].alto = 95;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].x = 841; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].y = 3;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].ancho = 94; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame1].alto = 91;
 	//3
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].x = 742; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].y = 1;
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].ancho = 97; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].alto = 95;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].x = 744; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].y = 3;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].ancho = 94; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame2].alto = 91;
 	//4
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].x = 647; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].y = 1;
-	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].ancho = 95; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].alto = 95;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].x = 649; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].y = 3;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].ancho = 92; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].alto = 91;
 
 }
 
@@ -900,6 +909,11 @@ void DibujaPixeles()
 
 			DetectaColisiones();  
 
+				if (P_Power) {
+					P_Power = false;
+					F_Velocidad += 80;
+					Piggy_Estatus += 1;
+				}
 				if (Muerte) { 
 					AnimacionActual = Death;
 					Estatus = false;
@@ -908,15 +922,15 @@ void DibujaPixeles()
 					A_Coin1 = false;
 					Moneda1 += 100;
 				}
-		//Dibujamos a PIGGY
-		if (KEYS[input.P]) {
-			TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles), 
-				misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
-				misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
-				misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].ancho, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].alto,
-				800, misPowerUp.HojaSprite.ancho,
-				2, 2, TRANSPARENCY_P, 1);
-		}
+				if (Piggy_Estatus < 1) {
+					//Dibujamos a PIGGY		
+					TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles),
+						misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
+						misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
+						misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].ancho, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].alto,
+						800, misPowerUp.HojaSprite.ancho,
+						1, 1, TRANSPARENCY_P, 1);					
+				}
 
 		//Dibujamos el Level Complete
 		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
@@ -1166,8 +1180,26 @@ bool DetectaColisiones() {
 			if(E_Velocidad<23)E_Velocidad += 1;		
 			return A_Coin1 = true;			
 		}
-		
+		if(Piggy_Estatus < 1){
+			if (misPowerUp.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho + 80 &&
+				misPowerUp.XCurrentCoordDraw + 94 > miPersonaje.XCurrentCoordDraw &&
+				misPowerUp.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
+				misPowerUp.YCurrentCoordDraw + 91 > miPersonaje.YCurrentCoordDraw) {
 
+				misPowerUp.XCurrentCoordDraw = 700;
+				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+				return P_Power = true;
+			}
+
+			if (misPowerUp.XCurrentCoordDraw < 0 + 40 &&  // Ax < Bx  + BWx 
+				misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
+				misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
+				misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By
+
+				misPowerUp.XCurrentCoordDraw = 700;
+				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+			}
+		}
 }
 
 void Puntaje(int seg) {
