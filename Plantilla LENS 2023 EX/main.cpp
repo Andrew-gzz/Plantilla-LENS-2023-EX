@@ -230,6 +230,7 @@ int AnimacionActual, Animacion_E, Animacion_C, Animacion_P;
 int FrameActual = 0, Max_Frame = 0;
 //Animaciones Actuales//
 int E_ActualFrame = 0;
+int E_Velocidad = 10;
 int C_ActualFrame = 0;
 int P_ActualFrame = 0;
 int DelayFrameAnimation=0;
@@ -237,11 +238,16 @@ bool pantallaInicial = true;
 bool pantallaVictoria = false;
 bool pantallaNivel = false;
 bool Estatus = true; // false = muerto true = vivo
+bool Muerte = false;
+//Musica
+bool FinalMusic = false;
 //Codigo para el Score
 bool ActiveScore = false;
+bool A_Coin1 = false;
 float MUL = 0.1;
 time_t tiempoInicio; 
 int Segundos;
+int Moneda1 = 0;
 float PuntajeT;
 
 const float sinlimite = 0;
@@ -273,7 +279,7 @@ void CargaFramesSprite();
 void CargaFramesSprite_E();
 void CargaFramesSprites_C();
 void CargarFramesPiggy();
-int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal);
+int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal);  
 // Función para calcular el tiempo transcurrido en segundos
 int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal) {
 	return (int)difftime(tiempoFinal, tiempoInicio); // Convertir de milisegundos a segundos 
@@ -392,13 +398,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 			break;
 		case WM_TIMER:
-			if(wParam == Tick)
-			{
+			if(wParam == Tick){
+			
 				MainRender(hWnd);
+				if(pantallaVictoria==false){
 				player->GetStatus(&status);
-				if (!pausa && status.fPlay == 0){
-					ReproductorReproduce();
+					if (!pausa && status.fPlay == 0) {
+						ReproductorReproduce();
+					}
 				}
+				if (Estatus == true) {//Se detiene el fondo si moriste
+				Mov_fondo += 12;
+				miMoneda.XCurrentCoordDraw -= 30;
+				miEnemigo.XCurrentCoordDraw -= E_Velocidad;
+				}
+				if (Mov_fondo >= 10100) {//Cuando llega al final hace lo siguiente
+					pantallaNivel = false;
+					PuntajeT = 0;
+					time_t tiempoFinal;
+					time(&tiempoFinal);
+					Segundos = Tiempo(tiempoInicio, tiempoFinal);
+					Puntaje(Segundos);
+					pantallaVictoria = true;					
+					END_GAME = true;
+				} 				
 			}
 			break;
 		case WM_PAINT:
@@ -444,22 +467,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void Init()
 {
 	ReproductorInicializaYReproduce();
+	
+		if(pantallaInicial){
+			srand(time(0)); 
+			int M = rand()%100 ; 
+			if (M % 2 == 0) { 
+				ReproductorCambiarCancionYReproduce(0);
+			}else		
+			ReproductorCambiarCancionYReproduce(2);
+		}
+		else if(pantallaNivel){		
+			ReproductorCambiarCancionYReproduce(1); 
+		}	
 
-	if(pantallaInicial){
-		srand(time(0)); 
-		int M = rand()%100 ; 
-		if (M % 2 == 0) { 
-			ReproductorCambiarCancionYReproduce(0);
-		}else		
-		ReproductorCambiarCancionYReproduce(2);
-	}
-	else if(pantallaNivel)
-	{
-		ReproductorCambiarCancionYReproduce(1); 
-	}
-	else if(pantallaVictoria) {
-		ReproductorCambiarCancionYReproduce(3); 
-	}
 	CargarFramesPiggy();
 	CargaFramesSprite();
 	CargaFramesSprite_E();
@@ -481,7 +501,7 @@ void Init()
 	ptrBufferPixelsWindow = new int[ANCHO_VENTANA * ALTO_VENTANA];
 
 	// Definimos la animacion inicial
-	AnimacionActual = Idle;
+	AnimacionActual = Dash;
 	Animacion_E = Running_E; 
 	Animacion_C = Coin1;
 	Animacion_P = Piggy;  
@@ -845,6 +865,7 @@ void DibujaPixeles()
 	}
 	else if(pantallaNivel)
 	{
+		
 		//Dibujamos el Primer Escenario
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario2.pixeles),
 			0, 0,//Iniciamos a dibujar en la ventana en 0,0
@@ -877,10 +898,15 @@ void DibujaPixeles()
 				800, miMoneda.HojaSprite.ancho,
 				1, 1, TRANSPARENCY, 1);
 
-			DetectaColisiones(); 
-				if (!DetectaColisiones()) {				
+			DetectaColisiones();  
+
+				if (Muerte) { 
 					AnimacionActual = Death;
 					Estatus = false;
+				}
+				if (A_Coin1) {
+					A_Coin1 = false;
+					Moneda1 += 100;
 				}
 		//Dibujamos a PIGGY
 		if (KEYS[input.P]) {
@@ -897,7 +923,12 @@ void DibujaPixeles()
 			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);		
 		}	
 	}
-	else if(pantallaVictoria){
+	else if(pantallaVictoria){	
+
+		if (FinalMusic == false) {
+			FinalMusic = true;
+		ReproductorCambiarCancionYReproduce(3);
+		}
 		//Pantalla de Victoria Scott_KISS
 		TranScaleblt(ptrBufferPixelsWindow, (miStage.ImagenEscenario3.pixeles),
 			0, 0,//Iniciamos a dibujar en la ventana en 0,0
@@ -932,11 +963,12 @@ void ActualizaAnimacion(HWND hWnd){
 				FrameActual = 0;				
 			}
 		}break;
-		case Jump: {	
+		case Jump: {
 			if (Active_Animation == true) {
 				FrameActual = 0;
 				Active_Animation = false;
-				}
+			}
+			if(Current==true){
 				FrameActual++;
 				if (FrameActual == 0) miPersonaje.YCurrentCoordDraw -= 40;
 				if (FrameActual == 1) miPersonaje.YCurrentCoordDraw -= 40;
@@ -950,10 +982,10 @@ void ActualizaAnimacion(HWND hWnd){
 					FrameActual = 0;
 					AnimacionActual = Idle;
 					Active_Animation = true;
-				} 
-
+				}
+			}			
 		}break;
-		case Walk: {
+		case Walk: {			
 			FrameActual++;
 			if (FrameActual > 5) {		
 				FrameActual = 0;
@@ -998,13 +1030,6 @@ void ActualizaAnimacion(HWND hWnd){
 void ActualizaAnimacionC(HWND hWnd) {
 	switch (Animacion_C) {
 	case Coin1:
-		if (C_ActualFrame == 0) miMoneda.XCurrentCoordDraw -= 30;
-		if (C_ActualFrame == 1) miMoneda.XCurrentCoordDraw -= 30;
-		if (C_ActualFrame == 2) miMoneda.XCurrentCoordDraw -= 30;
-		if (C_ActualFrame == 3) miMoneda.XCurrentCoordDraw -= 30;
-		if (C_ActualFrame == 4) miMoneda.XCurrentCoordDraw -= 30;
-		if (C_ActualFrame == 5) miMoneda.XCurrentCoordDraw -= 30;
-		if (C_ActualFrame == 6) miMoneda.XCurrentCoordDraw -= 30;
 		C_ActualFrame++;
 		if (C_ActualFrame > 5 ) C_ActualFrame = 0;
 		break;
@@ -1017,14 +1042,39 @@ void ActualizaAnimacionE(HWND hWnd) {
 	switch (Animacion_E) {
 	case Running_E:
 		E_ActualFrame++;
-		if (Estatus) {
-			if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 25;
-			if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 25;
-			if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 25;
-			if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 25;
-			if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 25;
-			if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 25;
-		}		
+		/*if (Estatus) {
+			if(Mov_fondo < 2000){
+				if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 10;
+				if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 10;
+				if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 10;
+				if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 10;
+				if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 10;
+				if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 10;
+			}else if(2000 <= Mov_fondo < 4000){
+				if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 15;
+				if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 15;
+				if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 15;
+				if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 15;
+				if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 15;
+				if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 15;
+			}
+			else if (4000 <= Mov_fondo < 6000){
+				if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 20;
+				if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 20;
+				if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 20;
+				if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 20;
+				if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 20;
+				if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 20;
+
+			}else if ( 6000 <= Mov_fondo < 8000) {
+				if (E_ActualFrame == 0) miEnemigo.XCurrentCoordDraw -= 25;
+				if (E_ActualFrame == 1) miEnemigo.XCurrentCoordDraw -= 25;
+				if (E_ActualFrame == 2) miEnemigo.XCurrentCoordDraw -= 25;
+				if (E_ActualFrame == 3) miEnemigo.XCurrentCoordDraw -= 25;
+				if (E_ActualFrame == 4) miEnemigo.XCurrentCoordDraw -= 25;
+				if (E_ActualFrame == 5) miEnemigo.XCurrentCoordDraw -= 25;
+			}
+		}	*/	
 		if (E_ActualFrame > 5) E_ActualFrame = 0;
 		break;
 	}
@@ -1075,45 +1125,61 @@ bool DetectaColisiones() {
 		DibujaHitbox(ptrBufferPixelsWindow, Verde, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
 		miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100,//Ancho y Alto de la caja
-		1 ,1);//Escala de la caja de colision */
+		1 ,1);//Escala de la caja de colision 
+	DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+		miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw, //Cordenadas de la caja de colision
+		51, 57,//Ancho y Alto de la caja
+		1, 1);//Escala de la caja de colision*/
+
 		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
-			miEnemigo.YCurrentCoordDraw + 81  > miPersonaje.YCurrentCoordDraw) {
-			return false;
-			
+			miEnemigo.YCurrentCoordDraw + 71  > miPersonaje.YCurrentCoordDraw) {
+			return Muerte=true;			
+		}	
+		if (miEnemigo.XCurrentCoordDraw < 15 + 15 &&
+		miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
+		miEnemigo.YCurrentCoordDraw < 585 && 
+		miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > 0) {
+		// Generar nuevas coordenadas aleatorias para el enemigo
+		
+		miEnemigo.XCurrentCoordDraw = 770; // max 600 min 0
+		miEnemigo.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
 		}
-		else {
-			if (miEnemigo.XCurrentCoordDraw < 15 + 15 &&
-			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
-			miEnemigo.YCurrentCoordDraw < 585 && 
-			miEnemigo.YCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto > 0) {
-			// Generar nuevas coordenadas aleatorias para el enemigo
-			miEnemigo.XCurrentCoordDraw = 660; // max 600 min 0
-			miEnemigo.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-			}
-			if (miMoneda.XCurrentCoordDraw < 15 + 15 &&
-				miMoneda.XCurrentCoordDraw + miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho + 70 > 20 &&
-				miMoneda.YCurrentCoordDraw < 585 &&
-				miMoneda.YCurrentCoordDraw + miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto > 0) {
+
+		if (miMoneda.XCurrentCoordDraw < 0  + 40  && // Ax < Bx  + BWx 
+			miMoneda.XCurrentCoordDraw + 51 > 0   && // Ax + AWx > Bx 
+			miMoneda.YCurrentCoordDraw < 0  + 600 && //	Ay < By  + BHy
+			miMoneda.YCurrentCoordDraw + 57 > 0) {   // Ay + AHy > By
 				
-				miMoneda.XCurrentCoordDraw = 660; 
-				miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-			}
-}
+			miMoneda.XCurrentCoordDraw = 700; 
+			miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+		}
+
+		if (miMoneda.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho + 80 &&
+			miMoneda.XCurrentCoordDraw + 51 > miPersonaje.XCurrentCoordDraw &&
+			miMoneda.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
+			miMoneda.YCurrentCoordDraw + 57 > miPersonaje.YCurrentCoordDraw) {
+
+			miMoneda.XCurrentCoordDraw = 700;
+			miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+			if(E_Velocidad<23)E_Velocidad += 1;		
+			return A_Coin1 = true;			
+		}
+		
 
 }
 
 void Puntaje(int seg) {
 
 	if (seg < 80) {
-		PuntajeT += (2000 + 600) * 2;
+		PuntajeT += ((2000 + 600) * 2) + Moneda1;
 	}
 	else if (80 <= seg < 100) {
-		PuntajeT += (1500 + 600) * 1;
+		PuntajeT += ((1500 + 600) * 1) + Moneda1;
 	}
 	else if (100<=seg<120) {
-		PuntajeT += (1000 + 600) * .5;
+		PuntajeT += ((1000 + 600) * .5) + Moneda1;
 	}
 	else if (seg>120)
 	{
@@ -1138,7 +1204,9 @@ void KeysEvents()
 		Estatus = true;
 		pantallaVictoria = false;
 		pantallaInicial = false;
+		Muerte = false;
 		ActiveScore = false;
+		FinalMusic = false;
 		time(&tiempoInicio); 
 		Init();
 	}
@@ -1155,142 +1223,35 @@ void KeysEvents()
 		if (!pantallaInicial)//Si no es la pantalla de inicio haz lo siguiente
 		{
 			//Movimiento
-			if (KEYS[input.W] || KEYS[input.Up])
-			{
-					if (!D_Pressed) {
-						if (miPersonaje.YCurrentCoordDraw >= 130) {
-							miPersonaje.YCurrentCoordDraw -= 15;
-							AnimacionActual = Walk;
-							W_Pressed = true;
-						}
-						AnimacionActual = Walk;
-						W_Pressed = true;
-					}
-					if (miPersonaje.YCurrentCoordDraw >= 130) {
-						miPersonaje.YCurrentCoordDraw -= 15;
-					}				
-			}
-			else if (W_Pressed)
-			{
+			if (KEYS[input.W] || KEYS[input.Up]){
+				if (AnimacionActual == Dash) FrameActual = 0;
+				if (miPersonaje.YCurrentCoordDraw >= 130) {
+					miPersonaje.YCurrentCoordDraw -= 20;
+					AnimacionActual = Walk;						
+				}else{
+					AnimacionActual = Walk; 
+				}
+				W_Pressed = true;
+			}else if(W_Pressed == true){
 				W_Pressed = false;
-				FrameActual = 0;
-				AnimacionActual = Idle;
-			}
-			if (KEYS[input.D] || KEYS[input.Right])
-			{	
-
-				if (Mov_fondo <= 10100) {
-					/*if (Current == true) {
-						Mov_fondo += 25;
-						D_Pressed = true;
-					}
-					if (KEYS[input.Space]) {
-							
-						AnimacionActual = Jump;						
-						Mov_fondo += 25;
-					}
-					else if(Current != false)
-					{
-						Mov_fondo += 20;
-						AnimacionActual = Dash;
-						D_Pressed = true;
-					}*/
-					if (KEYS[input.Space]) {
-						Mov_fondo += 20;
-						AnimacionActual = Jump;
-						Current = true; 
-					}else if(Current==true) {
-						Mov_fondo += 20;
-					}
-					else {
-						Mov_fondo += 15;
-						AnimacionActual = Dash;
-						D_Pressed = true;
-					}
-
-				}
-				else {
-					//Variables para el final del juego
-					ReproductorPausa();
-					ReproductorInicializaYReproduce();						
-					ReproductorCambiarCancionYReproduce(3); 
-					PuntajeT = 0; 
-					time_t tiempoFinal; 
-					time(&tiempoFinal); 
-					Segundos = Tiempo(tiempoInicio, tiempoFinal); 
-					Puntaje(Segundos); 
-					pantallaVictoria = true;
-					pantallaNivel = false;
-					END_GAME = true;
-					D_Pressed = true;						
-				}
-				
-			}
-			else if (D_Pressed)
-			{
-				D_Pressed = false;
-				AnimacionActual = Idle;
-				FrameActual = 0;
-
+				AnimacionActual = Dash;
 			}
 			if (KEYS[input.S] || KEYS[input.Down])
-			{				
-				if (!D_Pressed) {
-
-					if (miPersonaje.YCurrentCoordDraw > 360) {
-						AnimacionActual = Walk;
-						S_Pressed = true;
-					}
-					else {
-						miPersonaje.YCurrentCoordDraw += 12;
-						AnimacionActual = Walk;
-						S_Pressed = true;
-					}
-				}					
-			}
-			else if (S_Pressed)
-			{
+			{	
+				if (AnimacionActual == Dash) FrameActual = 0; 
+				if (miPersonaje.YCurrentCoordDraw < 366) {
+					miPersonaje.YCurrentCoordDraw += 20;
+					AnimacionActual = Walk; 
+				}
+				else {
+					AnimacionActual = Walk;						
+				}
+				S_Pressed = true;
+			}else if(S_Pressed == true) {
 				S_Pressed = false;
-				FrameActual = 0;
-				AnimacionActual = Idle;
+				AnimacionActual = Dash; 
+			}
 
-			}
-			if (KEYS[input.A] || KEYS[input.Left])
-			{
-					if (!D_Pressed) {
-						if (Mov_fondo > 0) {
-							Mov_fondo -= 10;
-							AnimacionActual = Walk;
-							A_Pressed = true;
-						}
-						else {
-							AnimacionActual = Walk;
-							A_Pressed = true;
-						}
-					}
-				
-				
-			}
-			else if (A_Pressed)
-			{				
-				A_Pressed = false;
-				FrameActual = 0;
-				AnimacionActual = Idle; 
-
-			}
-			//Salto
-			/**/
-			if (KEYS[input.Space]) {//KEYS[input.Space]&& KEYS[input.D]
-				if (!D_Pressed && !W_Pressed && !A_Pressed && !S_Pressed) {
-					SPACE_Pressed = true; 
-					Current = true; 
-				}									
-			}
-			else if (SPACE_Pressed) {
-				SPACE_Pressed = false;				  
-				AnimacionActual = Jump;	
-				FrameActual = 0;
-			}
 			///Baile
 			if (KEYS[input.F]) {			
 					F_Pressed = true;
@@ -1301,7 +1262,6 @@ void KeysEvents()
 				AnimacionActual = Idle; 
 				FrameActual = 0;
 			}
-
 			//Puntuacion
 			if (KEYS[input.G]) {							
 					G_Pressed = true;												
@@ -1314,6 +1274,98 @@ void KeysEvents()
 				Segundos = Tiempo(tiempoInicio, tiempoFinal);   
 				Puntaje(Segundos);  			
 			}
+			//NO en uso
+			/*if (KEYS[input.D] || KEYS[input.Right])
+				{
+					if (Mov_fondo <= 10100) {
+						if (Current == true) {
+							Mov_fondo += 25;
+							D_Pressed = true;
+						}
+						if (KEYS[input.Space]) {
+
+							AnimacionActual = Jump;
+							Mov_fondo += 25;
+						}
+						else if(Current != false)
+						{
+							Mov_fondo += 20;
+							AnimacionActual = Dash;
+							D_Pressed = true;
+						}
+						if (KEYS[input.Space]) {
+							//Mov_fondo += 20;
+							AnimacionActual = Jump;
+							Current = true;
+						}else if(Current==true) {
+							//Mov_fondo += 20;
+						}
+						else {
+							//Mov_fondo += 15;
+							AnimacionActual = Dash;
+							D_Pressed = true;
+						}
+					}
+					else {
+						//Variables para el final del juego
+						ReproductorPausa();
+						ReproductorInicializaYReproduce();
+						ReproductorCambiarCancionYReproduce(3);
+						PuntajeT = 0;
+						time_t tiempoFinal;
+						time(&tiempoFinal);
+						Segundos = Tiempo(tiempoInicio, tiempoFinal);
+						Puntaje(Segundos);
+						pantallaVictoria = true;
+						pantallaNivel = false;
+						END_GAME = true;
+						D_Pressed = true;
+					}
+
+				}
+				else if (D_Pressed)
+				{
+					D_Pressed = false;
+					Current = false;
+					FrameActual = 0;
+					AnimacionActual = Idle;
+				}*/
+				/*if (KEYS[input.A] || KEYS[input.Left])
+				{
+						if (!D_Pressed) {
+							if (Mov_fondo > 0) {
+								Mov_fondo -= 10;
+								AnimacionActual = Walk;
+								A_Pressed = true;
+							}
+							else {
+								AnimacionActual = Walk;
+								A_Pressed = true;
+							}
+						}
+
+
+				}
+				else if (A_Pressed)
+				{
+					A_Pressed = false;
+					FrameActual = 0;
+					AnimacionActual = Idle;
+
+				}*/
+				//Salto
+				/*
+				if (KEYS[input.Space]) {//KEYS[input.Space]&& KEYS[input.D]
+					if (!D_Pressed && !W_Pressed && !A_Pressed && !S_Pressed) {
+						SPACE_Pressed = true;
+						Current = true;
+					}
+				}
+				else if (SPACE_Pressed) {
+					SPACE_Pressed = false;
+					AnimacionActual = Jump;
+					FrameActual = 0;
+				}*/
 		}
 	}
 	
