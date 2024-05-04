@@ -845,6 +845,7 @@ void CargarFramesPiggy() {
 /* Funcion principal. Encargada de hacer el redibujado en pantalla cada intervalo (o "Tick") del timer que se haya creado.
 	@param hWnd. Manejador de la ventana.
 	*/
+bool iniciar_coords = false;
 void DibujaPixeles()
 {
 	if (pantallaInicial)
@@ -906,14 +907,23 @@ void DibujaPixeles()
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
 				800, miMoneda.HojaSprite.ancho,
 				1, 1, TRANSPARENCY, 1);
-
+			if (Moneda1 == 100 && Piggy_Estatus < 1) {
+				//Dibujamos a PIGGY	/*iniciamos coordenadas	*/	
+				
+				if (iniciar_coords == false) {iniciar_coords = true;				
+				misPowerUp.XCurrentCoordDraw = 700;
+				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+				}				
+				TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles),
+					misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
+					misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
+					misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].ancho, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].alto,
+					800, misPowerUp.HojaSprite.ancho,
+					1, 1, TRANSPARENCY_P, 1);
+			}
 			DetectaColisiones();  
 
-				if (P_Power) {
-					P_Power = false;
-					F_Velocidad += 80;
-					Piggy_Estatus += 1;
-				}
+				
 				if (Muerte) { 
 					AnimacionActual = Death;
 					Estatus = false;
@@ -922,15 +932,12 @@ void DibujaPixeles()
 					A_Coin1 = false;
 					Moneda1 += 100;
 				}
-				if (Piggy_Estatus < 1) {
-					//Dibujamos a PIGGY		
-					TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles),
-						misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
-						misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
-						misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].ancho, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].alto,
-						800, misPowerUp.HojaSprite.ancho,
-						1, 1, TRANSPARENCY_P, 1);					
+				if (P_Power) {
+					P_Power = false;
+					F_Velocidad += 80;
+					Piggy_Estatus += 1;
 				}
+				
 
 		//Dibujamos el Level Complete
 		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
@@ -1140,10 +1147,18 @@ bool DetectaColisiones() {
 		miPersonaje.XCurrentCoordDraw, miPersonaje.YCurrentCoordDraw, //Cordenadas de la caja de colision
 		miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80, miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100,//Ancho y Alto de la caja
 		1 ,1);//Escala de la caja de colision 
-	DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+
+		DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
 		miMoneda.XCurrentCoordDraw, miMoneda.YCurrentCoordDraw, //Cordenadas de la caja de colision
 		51, 57,//Ancho y Alto de la caja
-		1, 1);//Escala de la caja de colision*/
+		1, 1);//Escala de la caja de colision
+
+		DibujaHitbox(ptrBufferPixelsWindow, Blanco, ANCHO_VENTANA, ALTO_VENTANA, //Tamaño de la ventana
+			misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw, //Cordenadas de la caja de colision
+			94, 91,//Ancho y Alto de la caja
+			1, 1);//Escala de la caja de colision
+
+*/
 
 		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
@@ -1180,7 +1195,18 @@ bool DetectaColisiones() {
 			if(E_Velocidad<23)E_Velocidad += 1;		
 			return A_Coin1 = true;			
 		}
-		if(Piggy_Estatus < 1){
+		
+		if (misPowerUp.XCurrentCoordDraw < 0 + 40 &&  // Ax < Bx  + BWx 
+			misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
+			misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
+			misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By
+
+			misPowerUp.XCurrentCoordDraw = 700;
+			misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+		}
+
+		if(Moneda1 == 100 &&Piggy_Estatus < 1){		
+
 			if (misPowerUp.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho + 80 &&
 				misPowerUp.XCurrentCoordDraw + 94 > miPersonaje.XCurrentCoordDraw &&
 				misPowerUp.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
@@ -1191,15 +1217,8 @@ bool DetectaColisiones() {
 				return P_Power = true;
 			}
 
-			if (misPowerUp.XCurrentCoordDraw < 0 + 40 &&  // Ax < Bx  + BWx 
-				misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
-				misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
-				misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By
-
-				misPowerUp.XCurrentCoordDraw = 700;
-				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-			}
 		}
+		
 }
 
 void Puntaje(int seg) {
