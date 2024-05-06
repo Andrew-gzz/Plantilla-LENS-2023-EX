@@ -192,10 +192,10 @@ struct DatosCoins{
 	int FramesAnimacionCoin1= 6;
 
 	int idAnimacionCoin2 = 1;
-	int FramesAnimacionCoin2 = 0;
+	int FramesAnimacionCoin2 = 6;
 
 	int idAnimacionCoin3 = 2;
-	int FramesAnimacionCoin3 = 0;
+	int FramesAnimacionCoin3 = 6;
 
 	FrameArray** FrameSpriteArray;
 }miMoneda;
@@ -232,6 +232,7 @@ int FrameActual = 0, Max_Frame = 0;
 int E_ActualFrame = 0;
 int E_Velocidad = 10;
 int C_ActualFrame = 0;
+int C_Velocidad = 30;
 int P_ActualFrame = 0;
 int DelayFrameAnimation=0;
 bool pantallaInicial = true;
@@ -251,8 +252,9 @@ int Segundos;
 int Moneda1 = 0;
 float PuntajeT;
 //Codigo para PowerUps
-bool Piggy_is_Active = false;
+bool Once = false;
 bool P_Power = false;
+
 int F_Velocidad = 15;
 int Max_Power_Up = 0;
 
@@ -414,27 +416,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						ReproductorReproduce();
 					}
 				}
-				if (Estatus == true) {//Se detiene el fondo si moriste
+				if (pantallaNivel){
+					if (Estatus == true) {//Se detiene el fondo si moriste
 
-					if (F_Velocidad > 15) {
-						F_Velocidad -= 2;
-					}
+						if (F_Velocidad > 15) {
+							F_Velocidad -= 2;														
+						}
 				
-				Mov_fondo += F_Velocidad;//Suma velocidad
-				miMoneda.XCurrentCoordDraw -= 30;
-				misPowerUp.XCurrentCoordDraw -= 40;
-				miEnemigo.XCurrentCoordDraw -= E_Velocidad;
-				}
-				if (Mov_fondo >= 10100) {//Cuando llega al final hace lo siguiente
-					pantallaNivel = false;
-					PuntajeT = 0;
-					time_t tiempoFinal;
-					time(&tiempoFinal);
-					Segundos = Tiempo(tiempoInicio, tiempoFinal);
-					Puntaje(Segundos);
-					pantallaVictoria = true;					
-					END_GAME = true;
-				} 				
+					Mov_fondo += F_Velocidad;//Suma velocidad
+					miMoneda.XCurrentCoordDraw -= C_Velocidad;
+					misPowerUp.XCurrentCoordDraw -= 40;
+					miEnemigo.XCurrentCoordDraw -= E_Velocidad;
+					}
+					if (Mov_fondo >= 10100) {//Cuando llega al final hace lo siguiente
+						pantallaNivel = false;
+						PuntajeT = 0;
+						time_t tiempoFinal;
+						time(&tiempoFinal);
+						Segundos = Tiempo(tiempoInicio, tiempoFinal);
+						Puntaje(Segundos);
+						pantallaVictoria = true;					
+						END_GAME = true;
+					} 	
+				}			
 			}
 			break;
 		case WM_PAINT:
@@ -516,7 +520,7 @@ void Init()
 	// Definimos la animacion inicial
 	AnimacionActual = Dash;
 	Animacion_E = Running_E; 
-	Animacion_C = Coin1;
+	Animacion_C = Coin3;
 	Animacion_P = Piggy;  
 }
 
@@ -784,17 +788,17 @@ void CargaFramesSprite_E() {
 void CargaFramesSprites_C(){
 	//Cargamos primero las hojas de sprite
 	miMoneda.HojaSprite = gdipLoad(miMoneda.BmpW);
-
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
 	int Coordsc = rand() % (400 - 150 + 1) + 150;
 	miMoneda.XCurrentCoordDraw = 600; //max 600 min 0
 	miMoneda.YCurrentCoordDraw = Coordsc; //Max 150 Min 400 
-	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
 	//Definiendo las dimenciones en base al # de Animaciones
 	miMoneda.FrameSpriteArray = new FrameArray * [miMoneda.Animaciones_Coin];
 
 	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1] = new FrameArray[miMoneda.FramesAnimacionCoin1]; 
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2] = new FrameArray[miMoneda.FramesAnimacionCoin2];
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3] = new FrameArray[miMoneda.FramesAnimacionCoin3];
 	// ------ - Animacion 1 Moneda 1- ------ //
 	//0
 	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].x = 22; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame0].y = 134;
@@ -814,6 +818,44 @@ void CargaFramesSprites_C(){
 	//6
 	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].x = 262; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].y = 134;
 	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].ancho = 51 ; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin1][Frame5].alto = 57;
+	// ------ - Animacion 2 Moneda 2- ------ //
+	//0
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame0].x = 21; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame0].y = 203;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame0].ancho = 39; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame0].alto = 63;
+	//1
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame1].x = 66; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame1].y = 203;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame1].ancho = 15; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame1].alto = 63;
+	//3
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame2].x = 87; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame2].y = 203;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame2].ancho = 38; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame2].alto = 63;
+	//4
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame3].x = 132; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame3].y = 203;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame3].ancho = 57; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame3].alto = 63;
+	//5
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame4].x = 192; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame4].y = 203;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame4].ancho = 63; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame4].alto = 63;
+	//6
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame5].x = 258; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame5].y = 203;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame5].ancho = 57; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin2][Frame5].alto = 63;
+	// ------ - Animacion 3 Moneda 3 - ------ //
+	//0
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame0].x = 21; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame0].y = 276;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame0].ancho = 39; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame0].alto = 68;
+	//1
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame1].x = 66; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame1].y = 276;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame1].ancho = 15; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame1].alto = 68;
+	//3
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame2].x = 89; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame2].y = 276;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame2].ancho = 39; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame2].alto = 68;
+	//4
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame3].x = 134; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame3].y = 276;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame3].ancho = 63; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame3].alto = 68;
+	//5
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame4].x = 204; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame4].y = 276;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame4].ancho = 69; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame4].alto = 68;
+	//6
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame5].x = 278; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame5].y = 276;
+	miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame5].ancho = 63; miMoneda.FrameSpriteArray[miMoneda.idAnimacionCoin3][Frame5].alto = 68;
 }
 
 void CargarFramesPiggy() {
@@ -911,49 +953,43 @@ void DibujaPixeles()
 				miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].ancho, miMoneda.FrameSpriteArray[Animacion_C][C_ActualFrame].alto,
 				800, miMoneda.HojaSprite.ancho,
 				1, 1, TRANSPARENCY, 1);
+			
 
-			if ((Moneda1 == 500 || Moneda1 == 1000 || Moneda1 == 1500) && Max_Power_Up == 0 && F_Velocidad <= 15) {
+			DetectaColisiones();
+			if ((Moneda1 == 500 || Moneda1 == 1000 || Moneda1 == 1600) && Max_Power_Up == 0 && F_Velocidad <= 15 && !Once) {
 				Max_Power_Up += 1;
+				misPowerUp.XCurrentCoordDraw = 750;
 			}
-
+			else if (Once&& Max_Power_Up == 1) {
+				Max_Power_Up -= 1;
+			}
 			if (Max_Power_Up == 1) {
-				//Dibujamos a PIGGY	/*iniciamos coordenadas	*/					
-				if (iniciar_coords == false) {iniciar_coords = true;				
-				misPowerUp.XCurrentCoordDraw = 700;
-				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-				}	
+
 				TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles),
 					misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
 					misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
 					misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].ancho, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].alto,
 					800, misPowerUp.HojaSprite.ancho,
 					1, 1, TRANSPARENCY_P, 1);
-				
+
 			}
-
-			DetectaColisiones();  
+			else if (Moneda1 == 900 || Moneda1 == 1400) {
+				Once = false;
+			}
 			
-				if (Muerte) { 
-					AnimacionActual = Death;
-					Estatus = false;
-				}
-				if (A_Coin1) {
-					A_Coin1 = false;
-					Moneda1 += 100;
-				}
-				if (P_Power) {
-					Max_Power_Up -= 1;
-					iniciar_coords == false;
-					P_Power = false;					
-					F_Velocidad += 80;
-					
-				}
-				
-
-		//Dibujamos el Level Complete
-		if (AnimacionActual!= Death && Mov_fondo <= 10000) {
-			TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles),0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);		
-		}	
+			if (Muerte) { 
+				AnimacionActual = Death;
+				Estatus = false;
+			}
+			if (A_Coin1) {
+				A_Coin1 = false;
+				Moneda1 += 100;
+			}		
+			if (P_Power) {
+				Max_Power_Up -= 1;
+				P_Power = false;
+				F_Velocidad += 70;				
+			}					
 	}
 	else if(pantallaVictoria){	
 
@@ -970,7 +1006,11 @@ void DibujaPixeles()
 			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 		//Victoria
 		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
-		
+		if (!ActiveScore) {
+			ActiveScore = true;
+			wstring mensaje = L"Su puntuacion ha sido: " + to_wstring(PuntajeT);
+			MessageBox(NULL, mensaje.c_str(), L"Score", MB_OK | MB_ICONINFORMATION);
+		}
 	}
 
 }
@@ -1062,10 +1102,18 @@ void ActualizaAnimacion(HWND hWnd){
 //Monedas
 void ActualizaAnimacionC(HWND hWnd) {
 	switch (Animacion_C) {
-	case Coin1:
-		C_ActualFrame++;
-		if (C_ActualFrame > 5 ) C_ActualFrame = 0;
-		break;
+		case Coin1:{
+			C_ActualFrame++;
+			if (C_ActualFrame > 5 ) C_ActualFrame = 0;
+		}break;
+		case Coin2: { 
+			C_ActualFrame++;
+			if (C_ActualFrame > 5) C_ActualFrame = 0;	
+		}break;
+		case Coin3: {
+			C_ActualFrame++;
+			if (C_ActualFrame > 5) C_ActualFrame = 0;
+		}break;
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -1138,7 +1186,6 @@ bool DetectaColisiones() {
 			1, 1);//Escala de la caja de colision
 
 */
-
 		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
@@ -1178,15 +1225,16 @@ bool DetectaColisiones() {
 		if (misPowerUp.XCurrentCoordDraw < 0 + 40 &&  // Ax < Bx  + BWx 
 			misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
 			misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
-			misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By
-
-			if (Max_Power_Up == 1) Max_Power_Up -= 1;
-
-			misPowerUp.XCurrentCoordDraw = 700;
+			misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By		
+			
+			misPowerUp.XCurrentCoordDraw = 750;
 			misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-						
-		}
 
+			if (Max_Power_Up == 1){
+				return Once = true;
+			}
+		}
+		
 		if(Max_Power_Up == 1){
 
 			if (misPowerUp.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho + 80 &&
@@ -1219,11 +1267,7 @@ void Puntaje(int seg) {
 	{
 		PuntajeT += 0;
 	}
-	if (!ActiveScore) {
-		ActiveScore = true;
-		wstring mensaje = L"Su puntuacion ha sido: " + to_wstring(PuntajeT);
-		MessageBox(NULL, mensaje.c_str(), L"Score", MB_OK | MB_ICONINFORMATION);
-	}
+	
 }
 //Funcion para resetear variables al perder o ganar
 void Reset_All() {
@@ -1316,98 +1360,6 @@ void KeysEvents()
 				Segundos = Tiempo(tiempoInicio, tiempoFinal);   
 				Puntaje(Segundos);  			
 			}
-			//NO en uso
-			/*if (KEYS[input.D] || KEYS[input.Right])
-				{
-					if (Mov_fondo <= 10100) {
-						if (Current == true) {
-							Mov_fondo += 25;
-							D_Pressed = true;
-						}
-						if (KEYS[input.Space]) {
-
-							AnimacionActual = Jump;
-							Mov_fondo += 25;
-						}
-						else if(Current != false)
-						{
-							Mov_fondo += 20;
-							AnimacionActual = Dash;
-							D_Pressed = true;
-						}
-						if (KEYS[input.Space]) {
-							//Mov_fondo += 20;
-							AnimacionActual = Jump;
-							Current = true;
-						}else if(Current==true) {
-							//Mov_fondo += 20;
-						}
-						else {
-							//Mov_fondo += 15;
-							AnimacionActual = Dash;
-							D_Pressed = true;
-						}
-					}
-					else {
-						//Variables para el final del juego
-						ReproductorPausa();
-						ReproductorInicializaYReproduce();
-						ReproductorCambiarCancionYReproduce(3);
-						PuntajeT = 0;
-						time_t tiempoFinal;
-						time(&tiempoFinal);
-						Segundos = Tiempo(tiempoInicio, tiempoFinal);
-						Puntaje(Segundos);
-						pantallaVictoria = true;
-						pantallaNivel = false;
-						END_GAME = true;
-						D_Pressed = true;
-					}
-
-				}
-				else if (D_Pressed)
-				{
-					D_Pressed = false;
-					Current = false;
-					FrameActual = 0;
-					AnimacionActual = Idle;
-				}*/
-				/*if (KEYS[input.A] || KEYS[input.Left])
-				{
-						if (!D_Pressed) {
-							if (Mov_fondo > 0) {
-								Mov_fondo -= 10;
-								AnimacionActual = Walk;
-								A_Pressed = true;
-							}
-							else {
-								AnimacionActual = Walk;
-								A_Pressed = true;
-							}
-						}
-
-
-				}
-				else if (A_Pressed)
-				{
-					A_Pressed = false;
-					FrameActual = 0;
-					AnimacionActual = Idle;
-
-				}*/
-				//Salto
-				/*
-				if (KEYS[input.Space]) {//KEYS[input.Space]&& KEYS[input.D]
-					if (!D_Pressed && !W_Pressed && !A_Pressed && !S_Pressed) {
-						SPACE_Pressed = true;
-						Current = true;
-					}
-				}
-				else if (SPACE_Pressed) {
-					SPACE_Pressed = false;
-					AnimacionActual = Jump;
-					FrameActual = 0;
-				}*/
 		}
 	}
 	
