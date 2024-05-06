@@ -1,7 +1,10 @@
 #include <windows.h>
 #include <iostream> //Libreria para entrada y salida de datos
 #include <fstream> //Libreria para manejar archivos
+#include <sstream>
+#include <iomanip>  
 #include <string>
+#include <vector>
 #include <thread>   // Necesario para la función sleep_for
 #include <chrono>
 #include <ctime>  
@@ -291,6 +294,45 @@ void CargaFramesSprites_C();
 void CargarFramesPiggy();
 void Reset_All();
 int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal);  
+//Guardado de datos
+float Puntuaciones[3];
+int numPuntuaciones = 0;
+const int maxPuntuaciones = 3;
+void ordenarDescendente(float arr[], int n) {
+	for (int i = 0; i < n - 1; ++i) {
+		for (int j = 0; j < n - i - 1; ++j) {
+			if (arr[j] < arr[j + 1]) {
+				// Intercambiar elementos si están en el orden incorrecto
+				float temp = arr[j];
+				arr[j] = arr[j + 1];
+				arr[j + 1] = temp;
+			}
+		}
+	}
+}
+void leerDesdeArchivo(float arr[], int n) {
+	ifstream archivo("puntuaciones.txt");
+	if (archivo.is_open()) {
+		for (int i = 0; i < n; ++i) {
+			archivo >> arr[i];
+			numPuntuaciones++;  
+		}
+		archivo.close();		
+	}	
+}
+void guardarEnArchivo(const float arr[], int n) {
+	ofstream archivo("puntuaciones.txt");
+	if (archivo.is_open()) {
+		for (int i = 0; i < n; ++i) {
+			archivo << fixed << setprecision(2) << arr[i] << endl;
+		}
+		archivo.close();
+		cout << "Los datos se han guardado en el archivo 'puntuaciones.txt' correctamente." << endl;
+	}
+	else {
+		cout << "No se pudo abrir el archivo para escritura." << endl;
+	}
+}
 // Función para calcular el tiempo transcurrido en segundos
 int Tiempo(DWORD tiempoInicio, DWORD tiempoFinal) {
 	return (int)difftime(tiempoFinal, tiempoInicio); // Convertir de milisegundos a segundos 
@@ -373,7 +415,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	switch(uMsg)									// Check For Windows Messages
 	{
-	
+		
 		case WM_CREATE:
 		break;
 		case WM_KEYDOWN:
@@ -472,6 +514,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;*/
 		case WM_CLOSE: 
 			{
+			guardarEnArchivo(Puntuaciones, 3); 
 				DestroyWindow(hWnd);
 			}
 			break;
@@ -530,6 +573,7 @@ void Init()
 	Animacion_E = Running_E; 
 	Animacion_C = Coin1;
 	Animacion_P = Piggy;  
+	leerDesdeArchivo(Puntuaciones, maxPuntuaciones); 
 }
 
 //Scott
@@ -1039,11 +1083,41 @@ void DibujaPixeles()
 			1066, 600,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, miStage.ImagenEscenario3.ancho,
 			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+
 		//Victoria
 		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title3.pixeles), 40, 50, 0, 0, 700, 58, 800, misRecursos.Title3.ancho, 1, 1, TRANSPARENCY, 1);
+	 
 		if (!ActiveScore) {
-			ActiveScore = true;
-			wstring mensaje = L"Su puntuacion ha sido: " + to_wstring(PuntajeT);
+			
+			ActiveScore = true;	  			
+			if (numPuntuaciones < maxPuntuaciones) { 
+				// Guardar la puntuación
+				Puntuaciones[numPuntuaciones] = PuntajeT;
+				numPuntuaciones++;
+				ordenarDescendente(Puntuaciones, numPuntuaciones); 
+			}
+			else{
+				int indiceMenor = 0; 
+				float menorPuntuacion = Puntuaciones[0]; 
+				for (int i = 1; i < 3; ++i) { //Encuentra el #menor del arreglo
+					if (Puntuaciones[i] < menorPuntuacion) { 
+						menorPuntuacion = Puntuaciones[i]; 
+						indiceMenor = i; 
+					}
+				}
+
+				if (PuntajeT > menorPuntuacion) {
+					// Si el nuevo puntaje es mayor que la puntuación más baja, reemplaza esa puntuación
+					Puntuaciones[indiceMenor] = PuntajeT; 
+
+					// Ordenar nuevamente las puntuaciones de mayor a menor
+					ordenarDescendente(Puntuaciones, 3); 
+				}				
+			}
+			ostringstream ss;
+			ss << fixed << std::setprecision(0) << PuntajeT;
+			string str = ss.str();
+			wstring mensaje = L"Su puntuacion ha sido: " + wstring(str.begin(), str.end());			
 			MessageBox(NULL, mensaje.c_str(), L"Score", MB_OK | MB_ICONINFORMATION);
 		}
 	}
@@ -1326,6 +1400,7 @@ void Puntaje(int seg) {
 	}
 	
 }
+
 //Funcion para resetear variables al perder o ganar
 void Reset_All() {
 	
@@ -1347,14 +1422,12 @@ bool SpacePressed = false;
 void KeysEvents()
 {
 	int count = 0;
-	if (KEYS[input.Enter] && pantallaInicial == true)
-	{
+	if (KEYS[input.Enter] && pantallaInicial == true){	
 		Reset_All();
 		time(&tiempoInicio); 
 		Init();
 	}
-	if (KEYS[input.Backspace])
-	{
+	if (KEYS[input.Backspace]){	
 		pantallaInicial = true;
 		//resetar todo
 		END_GAME = false;
@@ -1363,8 +1436,8 @@ void KeysEvents()
 		Init();
 	}
 	if (!END_GAME && Estatus) {//Si Endgame es true, scott llego al final
-		if (!pantallaInicial)//Si no es la pantalla de inicio haz lo siguiente
-		{
+		if (!pantallaInicial){//Si no es la pantalla de inicio haz lo siguiente
+		
 			//Movimiento
 			if (KEYS[input.W] || KEYS[input.Up]){
 				if (AnimacionActual == Dash) FrameActual = 0;
@@ -1394,7 +1467,6 @@ void KeysEvents()
 				S_Pressed = false;
 				AnimacionActual = Dash; 
 			}
-
 			///Baile
 			if (KEYS[input.F]) {			
 					F_Pressed = true;
@@ -1404,22 +1476,9 @@ void KeysEvents()
 				F_Pressed = false;
 				AnimacionActual = Idle; 
 				FrameActual = 0;
-			}
-			//Puntuacion
-			if (KEYS[input.G]) {							
-					G_Pressed = true;												
-			}
-			else if (G_Pressed) {
-				G_Pressed = false;
-				PuntajeT = 0;
-				time_t tiempoFinal; 
-				time(&tiempoFinal); 
-				Segundos = Tiempo(tiempoInicio, tiempoFinal);   
-				Puntaje(Segundos);  			
-			}
+			}			
 		}
-	}
-	
+	}	
 }
 #pragma region LENS_CODE
 /* Pinta el fondo de la ventana de acuerdo al color especificado.
