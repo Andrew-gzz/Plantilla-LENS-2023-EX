@@ -70,7 +70,8 @@ enum Animaciones_Coin
 };
 enum Animaciones_Piggy {
 
-	Piggy
+	Piggy,
+	Piggy_used
 
 };
 enum Stages
@@ -154,7 +155,7 @@ struct Recursos {
 	miBitmap Title1;
 	WCHAR Bmp1[MAX_PATH] = L"Recursos/Scott_Pilgrim_Title.bmp";
 	miBitmap Title2;
-	WCHAR Bmp2[MAX_PATH] = L"Recursos/Press_any_key.bmp";
+	WCHAR Bmp2[MAX_PATH] = L"Recursos/Press_Enter.bmp";
 	miBitmap Title3;
 	WCHAR Bmp3[MAX_PATH] = L"Recursos/Level_Complete.bmp";
 	miBitmap Title4;
@@ -206,10 +207,12 @@ struct DatosPowerUp {
 	int XCurrentCoordDraw;
 	int YCurrentCoordDraw;
 
-	int Animaciones_PowerUp = 2;
+	int Animaciones_PowerUp = 3;
 
 	int idAnimacionPowerUp = 0;
 	int FramesAnimacionPowerUp = 4;
+	int idAnimacionPowerUp1 = 1;
+	int FramesAnimacionPowerUp1 = 5;
 
 	FrameArray** FrameSpriteArray;
 }misPowerUp;
@@ -249,7 +252,7 @@ bool A_Coin1 = false;
 float MUL = 0.1;
 time_t tiempoInicio; 
 int Segundos;
-int Moneda1 = 0, Contador = 0; //Contador sirve para el update de las monedas
+int Monedas = 0, Contador = 0; //Contador sirve para el update de las monedas
 float PuntajeT;
 //Codigo para PowerUps
 bool Once = false;
@@ -257,7 +260,6 @@ bool P_Power = false;
 
 int F_Velocidad = 15;
 int Max_Power_Up = 0;
-
 const float sinlimite = 0;
 const float fps1 = 1000 / 1;
 const float fps24 = 1000 / 24;
@@ -425,9 +427,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				
 					Mov_fondo += F_Velocidad;//Suma velocidad
 					miMoneda.XCurrentCoordDraw -= C_Velocidad;
+				
 					misPowerUp.XCurrentCoordDraw -= 40;
+													
 					if (F_Velocidad>15){					
-						miEnemigo.XCurrentCoordDraw = 800;}
+						miEnemigo.XCurrentCoordDraw = 800;						
+					}
 					
 					miEnemigo.XCurrentCoordDraw -= E_Velocidad;
 					}
@@ -867,13 +872,14 @@ void CargarFramesPiggy() {
 
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
 	int Coordsp = rand() % (400 - 150 + 1) + 150;
-	misPowerUp.XCurrentCoordDraw = 700; //max 600 min 0
+	misPowerUp.XCurrentCoordDraw = 800; //max 600 min 0
 	misPowerUp.YCurrentCoordDraw = Coordsp; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
 	//Definiendo las dimenciones en base al # de Animaciones
 	misPowerUp.FrameSpriteArray = new FrameArray * [misPowerUp.Animaciones_PowerUp];
 	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp] = new FrameArray[misPowerUp.FramesAnimacionPowerUp];
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1] = new FrameArray[misPowerUp.FramesAnimacionPowerUp1];
 	//----- -Piggy- ------//
 	//0
 	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].x = 938; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame0].y = 3;
@@ -887,14 +893,28 @@ void CargarFramesPiggy() {
 	//4
 	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].x = 649; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].y = 3;
 	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].ancho = 92; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp][Frame3].alto = 91;
-
+	//----- -Piggy- ------//
+	//0
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame0].x = 916; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame0].y = 97;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame0].ancho = 137; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame0].alto = 138;
+	//1
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame1].x = 758; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame1].y = 97;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame1].ancho = 137; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame1].alto = 138;
+	//3
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame2].x = 607; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame2].y = 97;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame2].ancho = 137; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame2].alto = 138;
+	//4
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame3].x = 451; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame3].y = 97;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame3].ancho = 137; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame3].alto = 138;
+	//5
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame4].x = 298; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame4].y = 97;
+	misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame4].ancho = 137; misPowerUp.FrameSpriteArray[misPowerUp.idAnimacionPowerUp1][Frame4].alto = 138;
 }
 
 
 /* Funcion principal. Encargada de hacer el redibujado en pantalla cada intervalo (o "Tick") del timer que se haya creado.
 	@param hWnd. Manejador de la ventana.
 	*/
-bool iniciar_coords = false, ini_coord_Enemy = false;
 void DibujaPixeles()
 {
 	if (pantallaInicial)
@@ -913,13 +933,13 @@ void DibujaPixeles()
 			500, 218,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, misRecursos.Title1.ancho,
 			1, 1, TRANSPARENCY_E, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
-		//Dibujamos "Press_any_key"
+		//Dibujamos "Press_Enter"
 		TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title2.pixeles),
-			60, 0,//Iniciamos a dibujar en la ventana en 0,0
+			100, 20,//Iniciamos a dibujar en la ventana en 0,0
 			0, 0,//Indicamos cuales son las coordenadas para dibujar desde nuestra imagen; iniciamos en 0,0 desde nuestro escenario
-			300, 23,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
+			589, 30,//Definimos cuantos pixeles dibujaremos de nuestra imagen a la pantalla
 			800, misRecursos.Title2.ancho,
-			2, 2, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
+			1, 1, TRANSPARENCY, 1);//Si ponemos un numero mayor a 1 estaremos repitiendo 2 veces la linea de pixeles en X o en Y
 
 	}
 	else if(pantallaNivel)
@@ -961,15 +981,16 @@ void DibujaPixeles()
 			
 
 			DetectaColisiones();
-			if ((Moneda1 == 500 || Moneda1 == 1000 || Contador == 11) && Max_Power_Up == 0 && F_Velocidad <= 15 && !Once) {
+			if ((Monedas == 500 || Monedas == 1000 || Contador == 12) && Max_Power_Up == 0 && F_Velocidad <= 15 && !Once) {
 				Max_Power_Up += 1;
-				misPowerUp.XCurrentCoordDraw = 750;
+				misPowerUp.XCurrentCoordDraw = 800;					
 			}
 			else if (Once&& Max_Power_Up == 1) {
 				Max_Power_Up -= 1;
+				Once = false;
 			}
 			if (Max_Power_Up == 1) {
-
+				
 				TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles),
 					misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
 					misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].x, misPowerUp.FrameSpriteArray[Animacion_P][P_ActualFrame].y,
@@ -978,9 +999,7 @@ void DibujaPixeles()
 					1, 1, TRANSPARENCY_P, 1);
 
 			}
-			else if (Moneda1 == 900 || Moneda1 == 1400) {
-				Once = false;
-			}
+			
 			
 			if (Muerte) { 
 				AnimacionActual = Death;
@@ -988,9 +1007,9 @@ void DibujaPixeles()
 			}
 			if (A_Coin1) {
 				A_Coin1 = false;
-				Moneda1 += 100;
+				Monedas += 100;
 				Contador += 1;
-				if (Contador == 2) {
+				if (Contador == 3) {
 					Animacion_C = Coin2;
 				}
 				if (Contador == 10) {
@@ -1031,7 +1050,6 @@ void DibujaPixeles()
 
 }
 
-bool Current = false; //Validacion si la animacion de salto esta Activa
 bool Active_Animation = true; //Validacion si hay alguna animacion en curso 
 //Actualizacion de las animaciones
 //Scott
@@ -1056,23 +1074,14 @@ void ActualizaAnimacion(HWND hWnd){
 			if (Active_Animation == true) {
 				FrameActual = 0;
 				Active_Animation = false;
-			}
-			if(Current==true){
-				FrameActual++;
-				if (FrameActual == 0) miPersonaje.YCurrentCoordDraw -= 40;
-				if (FrameActual == 1) miPersonaje.YCurrentCoordDraw -= 40;
-				if (FrameActual == 3) miPersonaje.YCurrentCoordDraw -= 40;
-				if (FrameActual == 5) miPersonaje.YCurrentCoordDraw -= 40;
-				if (FrameActual == 7) miPersonaje.YCurrentCoordDraw += 40;
-				if (FrameActual == 9) miPersonaje.YCurrentCoordDraw += 40;
-				if (FrameActual == 11) miPersonaje.YCurrentCoordDraw += 40;
-				if (FrameActual > 12) {//Mientras los frames no superen 12 seguira haciendo la animacion de saltar
-					Current = false;
-					FrameActual = 0;
-					AnimacionActual = Idle;
-					Active_Animation = true;
-				}
 			}			
+			FrameActual++;				
+			if (FrameActual > 12) {//Mientras los frames no superen 12 seguira haciendo la animacion de saltar
+				FrameActual = 0;
+				AnimacionActual = Idle;
+				Active_Animation = true;
+			}
+						
 		}break;
 		case Walk: {			
 			FrameActual++;
@@ -1152,6 +1161,23 @@ void ActualizaAnimacionP(HWND hWnd) {
 		P_ActualFrame++; 
 		if (P_ActualFrame > 3) P_ActualFrame = 0; 
 		break; 
+	case Piggy_used:
+		if (Tick % Tick == 0 && FrameActual == 0)//125
+		{
+			DelayFrameAnimation++;
+		}
+		else if (Tick % Tick == 0 && FrameActual == 7)
+		{
+			DelayFrameAnimation += 5;
+		}
+		if (DelayFrameAnimation % 1 == 0)
+		{
+			FrameActual++;
+			if (FrameActual > 4) {
+				FrameActual = 0;
+				Animacion_P = Piggy;
+			}
+		}
 	}
 	InvalidateRect(hWnd, NULL, FALSE);
 	UpdateWindow(hWnd);
@@ -1202,14 +1228,14 @@ bool DetectaColisiones() {
 			1, 1);//Escala de la caja de colision
 
 */
-	if (F_Velocidad <= 15) {
+	/*if (F_Velocidad <= 15) {
 		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
 			miEnemigo.YCurrentCoordDraw + 71  > miPersonaje.YCurrentCoordDraw) {
 			return Muerte=true;			
 		}	
-	}
+	}*/
 		if (miEnemigo.XCurrentCoordDraw < 15 + 15 &&
 		miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
 		miEnemigo.YCurrentCoordDraw < 585 && 
@@ -1235,8 +1261,10 @@ bool DetectaColisiones() {
 			miMoneda.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
 			miMoneda.YCurrentCoordDraw + 57 > miPersonaje.YCurrentCoordDraw) {
 
-			if (Animacion_C == Coin2) Moneda1 += 200; //Agarro la moneda tipo 2 suma 200 pts
-			if (Animacion_C == Coin3) Moneda1 += 500;
+			if (Animacion_C == Coin2) Monedas += 200; //Agarro la moneda tipo 2 suma 200 pts
+			if (Animacion_C == Coin3) { 
+				Monedas += 500;
+			}
 			Animacion_C = Coin1;					  //Reset a Moneda tipo 1		
 			miMoneda.XCurrentCoordDraw = 800;
 			miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
@@ -1244,18 +1272,25 @@ bool DetectaColisiones() {
 			return A_Coin1 = true;			
 		}
 		
-		if (misPowerUp.XCurrentCoordDraw < 0 + 40 &&  // Ax < Bx  + BWx 
+		if (misPowerUp.XCurrentCoordDraw < 20 + 40 &&  // Ax < Bx  + BWx 
 			misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
 			misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
 			misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By		
-			
-			misPowerUp.XCurrentCoordDraw = 750;
-			misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
 
+			misPowerUp.XCurrentCoordDraw = 800;
+			misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
 			if (Max_Power_Up == 1){
 				return Once = true;
 			}
 		}
+		/*if(Max_Power_Up==0){
+			if (misPowerUp.XCurrentCoordDraw < 600 + 40 &&  // Ax < Bx  + BWx 
+				misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
+				misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
+				misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By								
+				misPowerUp.XCurrentCoordDraw = 800;
+			}						
+		}*/
 		
 		if(Max_Power_Up == 1){
 
@@ -1263,10 +1298,10 @@ bool DetectaColisiones() {
 				misPowerUp.XCurrentCoordDraw + 94 > miPersonaje.XCurrentCoordDraw &&
 				misPowerUp.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
 				misPowerUp.YCurrentCoordDraw + 91 > miPersonaje.YCurrentCoordDraw) {
-
-				misPowerUp.XCurrentCoordDraw = 700;
+				
+				misPowerUp.XCurrentCoordDraw = 800;
 				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
-
+				//Animacion_P = Piggy_used;
 				return P_Power = true;
 			}
 
@@ -1277,13 +1312,13 @@ bool DetectaColisiones() {
 void Puntaje(int seg) {
 	// 1min con 20s es lo mas tardado que puedes
 	if (seg < 80) {
-		PuntajeT += ((2000 + 600) * 2) + Moneda1;
+		PuntajeT += ((2000 + 600) * 2) + Monedas;
 	}
 	else if (80 <= seg < 100) {
-		PuntajeT += ((1500 + 600) * 1) + Moneda1;
+		PuntajeT += ((1500 + 600) * 1) + Monedas;
 	}
 	else if (100<=seg<120) {
-		PuntajeT += ((1000 + 600) * .5) + Moneda1;
+		PuntajeT += ((1000 + 600) * .5) + Monedas;
 	}
 	else if (seg>120)
 	{
@@ -1302,9 +1337,8 @@ void Reset_All() {
 	ActiveScore = false;
 	FinalMusic = false;
 	Max_Power_Up = 0; //Codigo para resetear a piggy
-	Moneda1 = 0;
+	Monedas = 0;
 	Contador = 0;
-	iniciar_coords = false;
 	F_Velocidad = 15; //Resetear la velocidad del fondo
 } 
 
