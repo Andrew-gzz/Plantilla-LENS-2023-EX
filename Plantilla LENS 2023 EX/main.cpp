@@ -249,7 +249,7 @@ bool A_Coin1 = false;
 float MUL = 0.1;
 time_t tiempoInicio; 
 int Segundos;
-int Moneda1 = 0;
+int Moneda1 = 0, Contador = 0; //Contador sirve para el update de las monedas
 float PuntajeT;
 //Codigo para PowerUps
 bool Once = false;
@@ -520,7 +520,7 @@ void Init()
 	// Definimos la animacion inicial
 	AnimacionActual = Dash;
 	Animacion_E = Running_E; 
-	Animacion_C = Coin3;
+	Animacion_C = Coin1;
 	Animacion_P = Piggy;  
 }
 
@@ -984,12 +984,23 @@ void DibujaPixeles()
 			if (A_Coin1) {
 				A_Coin1 = false;
 				Moneda1 += 100;
+				Contador += 1;
+				if (Contador == 2) {
+					Animacion_C = Coin2;
+				}
+				if (Contador == 10) {
+					Animacion_C = Coin3; 
+				}
 			}		
 			if (P_Power) {
 				Max_Power_Up -= 1;
 				P_Power = false;
 				F_Velocidad += 70;				
-			}					
+			}
+			//Dibujamos el Level Complete
+			if (AnimacionActual != Death && Mov_fondo <= 10000) {
+				TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles), 0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);
+			}
 	}
 	else if(pantallaVictoria){	
 
@@ -1206,8 +1217,9 @@ bool DetectaColisiones() {
 			miMoneda.XCurrentCoordDraw + 51 > 0   && // Ax + AWx > Bx 
 			miMoneda.YCurrentCoordDraw < 0  + 600 && //	Ay < By  + BHy
 			miMoneda.YCurrentCoordDraw + 57 > 0) {   // Ay + AHy > By
-				
-			miMoneda.XCurrentCoordDraw = 700; 
+			Animacion_C = Coin1;
+			Contador = 0;//Se le fue una moneda reinicia el contador
+			miMoneda.XCurrentCoordDraw = 800; 
 			miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
 		}
 
@@ -1216,7 +1228,10 @@ bool DetectaColisiones() {
 			miMoneda.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
 			miMoneda.YCurrentCoordDraw + 57 > miPersonaje.YCurrentCoordDraw) {
 
-			miMoneda.XCurrentCoordDraw = 700;
+			if (Animacion_C == Coin2) Moneda1 += 200; //Agarro la moneda tipo 2 suma 200 pts
+			if (Animacion_C == Coin3) Moneda1 += 500;
+			Animacion_C = Coin1;					  //Reset a Moneda tipo 1		
+			miMoneda.XCurrentCoordDraw = 800;
 			miMoneda.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
 			if(E_Velocidad<23)E_Velocidad += 1;		//Dificultad del enemigo
 			return A_Coin1 = true;			
@@ -1281,6 +1296,7 @@ void Reset_All() {
 	FinalMusic = false;
 	Max_Power_Up = 0; //Codigo para resetear a piggy
 	Moneda1 = 0;
+	Contador = 0;
 	iniciar_coords = false;
 	F_Velocidad = 15; //Resetear la velocidad del fondo
 } 
