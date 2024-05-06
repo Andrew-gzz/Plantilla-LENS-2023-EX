@@ -426,6 +426,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					Mov_fondo += F_Velocidad;//Suma velocidad
 					miMoneda.XCurrentCoordDraw -= C_Velocidad;
 					misPowerUp.XCurrentCoordDraw -= 40;
+					if (F_Velocidad>15){					
+						miEnemigo.XCurrentCoordDraw = 800;}
+					
 					miEnemigo.XCurrentCoordDraw -= E_Velocidad;
 					}
 					if (Mov_fondo >= 10100) {//Cuando llega al final hace lo siguiente
@@ -754,7 +757,7 @@ void CargaFramesSprite_E() {
 	//if(KEYS[input.E])
 	int Coords = rand() % (400 - 150 +1)+150;
 	
-	miEnemigo.XCurrentCoordDraw = 500; //max 600 min 0
+	miEnemigo.XCurrentCoordDraw = 700; //max 600 min 0
 	miEnemigo.YCurrentCoordDraw = Coords; //Max 150 Min 400 
 	//Definiendo los tamaños de nuestro sprite para renderizarlo en la ventana
 
@@ -790,7 +793,7 @@ void CargaFramesSprites_C(){
 	miMoneda.HojaSprite = gdipLoad(miMoneda.BmpW);
 	//Definiendo las coordenadas iniciales en pantalla donde iniciaremos
 	int Coordsc = rand() % (400 - 150 + 1) + 150;
-	miMoneda.XCurrentCoordDraw = 600; //max 600 min 0
+	miMoneda.XCurrentCoordDraw = 700; //max 600 min 0
 	miMoneda.YCurrentCoordDraw = Coordsc; //Max 150 Min 400 
 
 	//Definiendo las dimenciones en base al # de Animaciones
@@ -891,7 +894,7 @@ void CargarFramesPiggy() {
 /* Funcion principal. Encargada de hacer el redibujado en pantalla cada intervalo (o "Tick") del timer que se haya creado.
 	@param hWnd. Manejador de la ventana.
 	*/
-bool iniciar_coords = false;
+bool iniciar_coords = false, ini_coord_Enemy = false;
 void DibujaPixeles()
 {
 	if (pantallaInicial)
@@ -939,12 +942,14 @@ void DibujaPixeles()
 			3, 3, TRANSPARENCY, 1);
 		
 		//Dibujamos al enemigo
+		if(F_Velocidad <= 15){				
 			TranScaleblt(ptrBufferPixelsWindow, (miEnemigo.HojaSprite.pixeles),
 				miEnemigo.XCurrentCoordDraw, miEnemigo.YCurrentCoordDraw,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].x, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].y,
 				miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho, miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].alto,
 				800, miEnemigo.HojaSprite.ancho,
 				1, 1, TRANSPARENCY_E, 1);
+		}
 	
 		//Dibujamos las monedas
 			TranScaleblt(ptrBufferPixelsWindow, (miMoneda.HojaSprite.pixeles),
@@ -956,7 +961,7 @@ void DibujaPixeles()
 			
 
 			DetectaColisiones();
-			if ((Moneda1 == 500 || Moneda1 == 1000 || Moneda1 == 1600) && Max_Power_Up == 0 && F_Velocidad <= 15 && !Once) {
+			if ((Moneda1 == 500 || Moneda1 == 1000 || Contador == 11) && Max_Power_Up == 0 && F_Velocidad <= 15 && !Once) {
 				Max_Power_Up += 1;
 				misPowerUp.XCurrentCoordDraw = 750;
 			}
@@ -997,7 +1002,7 @@ void DibujaPixeles()
 				P_Power = false;
 				F_Velocidad += 70;				
 			}
-			//Dibujamos el Level Complete
+			//Dibujamos la barra de vida
 			if (AnimacionActual != Death && Mov_fondo <= 10000) {
 				TranScaleblt(ptrBufferPixelsWindow, (misRecursos.Title5.pixeles), 0, 0, 0, 0, 290, 112, 800, misRecursos.Title5.ancho, 1, 1, TRANSPARENCY, 1);
 			}
@@ -1197,12 +1202,14 @@ bool DetectaColisiones() {
 			1, 1);//Escala de la caja de colision
 
 */
+	if (F_Velocidad <= 15) {
 		if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 			miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 			miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
 			miEnemigo.YCurrentCoordDraw + 71  > miPersonaje.YCurrentCoordDraw) {
 			return Muerte=true;			
 		}	
+	}
 		if (miEnemigo.XCurrentCoordDraw < 15 + 15 &&
 		miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho + 70 > 20 &&
 		miEnemigo.YCurrentCoordDraw < 585 && 
