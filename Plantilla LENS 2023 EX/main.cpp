@@ -1324,7 +1324,7 @@ bool Collbox_Piggy(){
 			return P_Power = true;
 		}
 
-		}
+	}
 
 }
 bool DetectaColisiones() {
@@ -1356,8 +1356,8 @@ bool DetectaColisiones() {
 			1, 1);//Escala de la caja de colision
 
 */
-	/**/
-		if (F_Velocidad <= 15) {
+	
+		/**/if (F_Velocidad <= 15) {
 			if (miEnemigo.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho+80 &&
 				miEnemigo.XCurrentCoordDraw + miEnemigo.FrameSpriteArray[Animacion_E][E_ActualFrame].ancho > miPersonaje.XCurrentCoordDraw &&
 				miEnemigo.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto+100 &&
@@ -1426,7 +1426,7 @@ void Reset_All() {
 	Muerte = false;
 	ActiveScore = false;
 	FinalMusic = false;
-	
+	Contador_YIYI = 0;
 	Extra_Bonus = 1;  //Codigo para resetear bonus
 	Monedas = 0;
 	Contador = 0;
