@@ -252,6 +252,8 @@ bool FinalMusic = false;
 //Codigo para el Score
 bool ActiveScore = false;
 bool A_Coin1 = false;
+int BERE = 0;//Para validar cuantos cochinitos agarró
+float Extra_Bonus = 1;
 float MUL = 0.1;
 time_t tiempoInicio; 
 int Segundos;
@@ -1033,7 +1035,7 @@ void DibujaPixeles()
 				Max_Power_Up -= 1;
 				Once = false;
 			}
-			if (Max_Power_Up == 1) {
+			if (Max_Power_Up == 1&&BERE!=3) {
 				
 				TranScaleblt(ptrBufferPixelsWindow, (misPowerUp.HojaSprite.pixeles),
 					misPowerUp.XCurrentCoordDraw, misPowerUp.YCurrentCoordDraw,
@@ -1062,8 +1064,19 @@ void DibujaPixeles()
 			}		
 			if (P_Power) {
 				Max_Power_Up -= 1;
-				P_Power = false;
-				F_Velocidad += 70;				
+				P_Power = false;				
+				if (BERE <= 2)
+				F_Velocidad += 70;
+				if (BERE == 3){				
+					//SORTEO DE X2 A TODO!!! O 8000 PTS
+					int W = rand() % 100;
+					if (W % 2 == 0) {
+						Monedas += 8000;
+					}
+					else {
+						Extra_Bonus = 2;
+					}
+				}									
 			}
 			//Dibujamos la barra de vida
 			if (AnimacionActual != Death && Mov_fondo <= 10000) {
@@ -1357,24 +1370,17 @@ bool DetectaColisiones() {
 				return Once = true;
 			}
 		}
-		/*if(Max_Power_Up==0){
-			if (misPowerUp.XCurrentCoordDraw < 600 + 40 &&  // Ax < Bx  + BWx 
-				misPowerUp.XCurrentCoordDraw + 94 > 0 &&   // Ax + AWx > Bx 
-				misPowerUp.YCurrentCoordDraw < 0 + 600 && // Ay < By  + BHy
-				misPowerUp.YCurrentCoordDraw + 91 > 0) {   // Ay + AHy > By								
-				misPowerUp.XCurrentCoordDraw = 800;
-			}						
-		}*/
-		
-		if(Max_Power_Up == 1){
+		if(Max_Power_Up == 1&&BERE!=3){
 
 			if (misPowerUp.XCurrentCoordDraw < miPersonaje.XCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].ancho + 80 &&
 				misPowerUp.XCurrentCoordDraw + 94 > miPersonaje.XCurrentCoordDraw &&
 				misPowerUp.YCurrentCoordDraw < miPersonaje.YCurrentCoordDraw + miPersonaje.FrameSpriteArray[AnimacionActual][FrameActual].alto + 100 &&
 				misPowerUp.YCurrentCoordDraw + 91 > miPersonaje.YCurrentCoordDraw) {
-				
+
+				BERE += 1;
 				misPowerUp.XCurrentCoordDraw = 800;
 				misPowerUp.YCurrentCoordDraw = rand() % (400 - 150 + 1) + 150;
+				
 				//Animacion_P = Piggy_used;
 				return P_Power = true;
 			}
@@ -1384,19 +1390,15 @@ bool DetectaColisiones() {
 }
 
 void Puntaje(int seg) {
-	// 1min con 20s es lo mas tardado que puedes
-	if (seg < 80) {
-		PuntajeT += ((2000 + 600) * 2) + Monedas;
+	// 1 min con 20s es lo mas tardado que puedes
+	if (seg < 59) {
+		PuntajeT += ((2600 + Monedas) * 1.5)* Extra_Bonus;
 	}
-	else if (80 <= seg < 100) {
-		PuntajeT += ((1500 + 600) * 1) + Monedas;
+	else if (59 =< seg < 79) {
+		PuntajeT += ((2100 + Monedas) * 1) * Extra_Bonus;
 	}
-	else if (100<=seg<120) {
-		PuntajeT += ((1000 + 600) * .5) + Monedas;
-	}
-	else if (seg>120)
-	{
-		PuntajeT += 0;
+	else if (seg > 79) {
+		PuntajeT += ((1600 + Monedas) * 0.5) * Extra_Bonus;
 	}
 	
 }
@@ -1412,8 +1414,10 @@ void Reset_All() {
 	ActiveScore = false;
 	FinalMusic = false;
 	Max_Power_Up = 0; //Codigo para resetear a piggy
+	Extra_Bonus = 1;  //Codigo para resetear bonus
 	Monedas = 0;
 	Contador = 0;
+	BERE = 0;		  //Reset contador de cuantos piggy agarraste
 	F_Velocidad = 15; //Resetear la velocidad del fondo
 } 
 
