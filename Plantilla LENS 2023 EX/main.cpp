@@ -1394,7 +1394,7 @@ void Puntaje(int seg) {
 	if (seg < 59) {
 		PuntajeT += ((2600 + Monedas) * 1.5)* Extra_Bonus;
 	}
-	else if (59 =< seg < 79) {
+	else if (59 <= seg < 79) {
 		PuntajeT += ((2100 + Monedas) * 1) * Extra_Bonus;
 	}
 	else if (seg > 79) {
